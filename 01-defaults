@@ -1,0 +1,10 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l in default test settings"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l P2P delay mechanism"
+
+nodes=2
+
+master_conf="delay_mechanism P2P"
+slave_conf="delay_mechanism P2P"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+master_conf="delay_mechanism Auto"
+slave_conf="delay_mechanism P2P"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+master_conf="delay_mechanism P2P"
+slave_conf="delay_mechanism Auto"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+master_conf="delay_mechanism P2P"
+slave_conf="delay_mechanism E2E"
+run_ptp4l || test_fail
+# this should fail
+check_sync && test_fail
+
+test_pass

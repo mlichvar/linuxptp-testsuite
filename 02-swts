@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with software time stamping"
+
+master_conf="time_stamping software"
+slave_conf="time_stamping software"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+master_conf="time_stamping hardware"
+slave_conf="time_stamping software"
+run_ptp4l || test_fail
+# this should fail (UTC-TAI offset)
+check_sync && test_fail
+
+test_pass

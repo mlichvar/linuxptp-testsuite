@@ -1,0 +1,180 @@
+# Copyright (C) 2013  Miroslav Lichvar <mlichvar@redhat.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+export PATH=$(pwd):$PATH
+
+if [ ! -e clknetsim ]; then
+	git clone https://github.com/mlichvar/clknetsim.git || exit 1
+fi
+
+if [ ! -x clknetsim/clknetsim -o ! -e clknetsim/clknetsim.so ]; then
+	pushd clknetsim
+	make || exit 1
+fi
+
+export CLKNETSIM_PATH=clknetsim
+
+. $CLKNETSIM_PATH/clknetsim.bash
+
+default_limit=500
+default_time_offset=1e-1
+default_freq_offset=1e-4
+default_static_delay=1e-7
+default_jitter=1e-7
+default_wander=1e-9
+default_time_rms_limit=1e-6
+default_freq_rms_limit=1e-6
+default_time_max_limit=1e-5
+default_freq_max_limit=1e-5
+default_min_sync_time=20
+default_max_sync_time=500
+default_nodes=3
+default_master_node=1
+default_slave_start=9.0
+default_rate=0
+default_master_conf=""
+default_slave_conf=""
+
+for defopt in $(declare | grep '^default_'); do
+	defoptname=${defopt%%=*}
+	optname=${defoptname#default_}
+	eval "$optname=\"\$$defoptname\""
+done
+
+test_start() {
+	rm -f tmp/*
+	echo "Testing $@:"
+}
+
+test_pass() {
+	echo "PASS"
+	exit 0
+}
+
+test_fail() {
+	echo "FAIL"
+	exit 1
+}
+
+test_ok() {
+	pad_line
+	echo -e "\tOK"
+	return 0
+}
+
+test_bad() {
+	pad_line
+	echo -e "\tBAD"
+	return 1
+}
+
+test_error() {
+	pad_line
+	echo -e "\tERROR"
+	return 1
+}
+
+msg_lenght=0
+pad_line() {
+	local line_length=40
+	[ $msg_lenght -lt $line_length ] && \
+		printf "%$[$line_length - $msg_lenght]s" ""
+	msg_lenght=0
+}
+
+test_message() {
+	local level=$1 eol=$2
+	shift 2
+	local msg="$*"
+
+	while [ $level -gt 0 ]; do
+		echo -n "  "
+		level=$[$level - 1]
+		msg_lenght=$[$msg_lenght + 2]
+	done
+	echo -n "$msg"
+
+	msg_lenght=$[$msg_lenght + ${#msg}]
+	if [ $eol -ne 0 ]; then
+		echo
+		msg_lenght=0
+	fi
+}
+
+check_sync() {
+	local i sync_time max_time_error max_freq_error ret=0
+
+	test_message 1 1 "checking clock sync time, time error, freq error:"
+	
+	for i in $(seq 1 $nodes); do
+		[ $i -eq $master_node ] && continue
+
+		sync_time=$(find_sync tmp/log.offset tmp/log.freq $i \
+			$time_rms_limit $freq_rms_limit 0.3)
+		max_time_error=$(get_stat 'Maximum absolute offset' $i)
+		max_freq_error=$(get_stat 'Maximum absolute frequency' $i)
+
+		test_message 0 0 "node $i: $sync_time $max_time_error $max_freq_error"
+
+		check_stat $sync_time $min_sync_time $max_sync_time && \
+			check_stat $max_time_error 0.0 $time_max_limit && \
+			check_stat $max_freq_error 0.0 $freq_max_limit && \
+			test_ok || test_bad
+
+		[ $? -eq 0 ] || ret=1
+	done
+
+	return $ret
+}
+
+print_nondefaults() {
+	local defopt defoptname optname
+
+	test_message 2 1 "non-default settings:"
+	declare | grep '^default_*' | while read defopt; do
+		defoptname=${defopt%%=*}
+		optname=${defoptname#default_}
+		eval "[ \"\$$optname\" = \"\$$defoptname\" ]" || \
+			test_message 3 1 $(eval "echo $optname=\$$optname")
+	done
+}
+
+run_ptp4l() {
+	local i
+
+	test_message 1 1 "ptp4l test with $nodes nodes:"
+	print_nondefaults
+
+	generate_config4 $master_node $nodes $time_offset \
+		"(+ $freq_offset (sum (* $wander (normal))))" \
+		"(+ $static_delay (* $jitter (exponential)))"
+
+	for i in $(seq 1 $nodes); do
+		test_message 2 0 "starting node $i:"
+		if [ $i -eq $master_node ]; then
+			start_client $i ptp4l "$master_conf" && test_ok || test_bad
+		else
+			echo "node${i}_start = $slave_start" >> tmp/conf
+			start_client $i ptp4l "$slave_conf" && test_ok || test_bad
+		fi
+	done
+
+	test_message 2 0 "running simulation:"
+
+	start_server $nodes -o tmp/log.offset -f tmp/log.freq \
+		-r $(awk "BEGIN {print $limit / 2 * 2^$rate}") \
+		-l $(awk "BEGIN {print $limit * 2^$rate}") \
+		&& test_ok || test_error
+}
