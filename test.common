@@ -185,10 +185,10 @@ run_ptp4l() {
 		test_message 2 0 "starting node $i:"
 		if [ $i -eq $master_node ]; then
 			echo "node${i}_start = $master_start" >> tmp/conf
-			start_client $i ptp4l "$master_conf" && test_ok || test_bad
+			start_client $i ptp4l "$master_conf" && test_ok || test_error
 		else
 			echo "node${i}_start = $slave_start" >> tmp/conf
-			start_client $i ptp4l "$slave_conf" && test_ok || test_bad
+			start_client $i ptp4l "$slave_conf" && test_ok || test_error
 		fi
 	done
 
