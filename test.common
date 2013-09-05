@@ -42,6 +42,7 @@ default_min_sync_time=20
 default_max_sync_time=500
 default_nodes=3
 default_master_node=1
+default_master_start=0.0
 default_slave_start=9.0
 default_rate=0
 default_master_conf=""
@@ -164,6 +165,7 @@ run_ptp4l() {
 	for i in $(seq 1 $nodes); do
 		test_message 2 0 "starting node $i:"
 		if [ $i -eq $master_node ]; then
+			echo "node${i}_start = $master_start" >> tmp/conf
 			start_client $i ptp4l "$master_conf" && test_ok || test_bad
 		else
 			echo "node${i}_start = $slave_start" >> tmp/conf
