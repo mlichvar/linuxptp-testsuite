@@ -128,7 +128,7 @@ check_sync() {
 		max_time_error=$(get_stat 'Maximum absolute offset' $i)
 		max_freq_error=$(get_stat 'Maximum absolute frequency' $i)
 
-		test_message 0 0 "node $i: $sync_time $max_time_error $max_freq_error"
+		test_message 2 0 "node $i: $sync_time $max_time_error $max_freq_error"
 
 		check_stat $sync_time $min_sync_time $max_sync_time && \
 			check_stat $max_time_error 0.0 $time_max_limit && \
