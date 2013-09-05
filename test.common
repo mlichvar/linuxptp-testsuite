@@ -194,3 +194,24 @@ run_ptp4l() {
 
 	run_simulation
 }
+
+run_phc2sys() {
+	local i
+
+	test_message 1 1 "phc2sys test with $nodes nodes:"
+	print_nondefaults
+
+	for i in $(seq 1 $nodes); do
+		cat >> tmp/conf <<-EOF
+			node${i}_freq = $(get_wander_expr)
+			node${i}_refclock = (* $jitter (normal))
+			node${i}_offset = $time_offset
+			node${i}_start = $slave_start
+		EOF
+
+		test_message 2 0 "starting node $i:"
+		start_client $i phc2sys "$slave_conf" && test_ok || test_error
+	done
+	
+	run_simulation
+}
