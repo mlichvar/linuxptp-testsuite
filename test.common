@@ -46,6 +46,7 @@ default_master_node=1
 default_master_start=0.0
 default_slave_start=9.0
 default_update_interval=0
+default_log_packets=0
 default_master_conf=""
 default_slave_conf=""
 
@@ -166,6 +167,7 @@ run_simulation() {
 	test_message 2 0 "running simulation:"
 
 	start_server $nodes -o tmp/log.offset -f tmp/log.freq \
+		$([ $log_packets -ne 0 ] && echo -p tmp/log.packets) \
 		-R $(awk "BEGIN {print $update_interval < 0 ? 2^-($update_interval) : 1}") \
 		-r $(awk "BEGIN {print $limit / 2 * 2^$update_interval}") \
 		-l $(awk "BEGIN {print $limit * 2^$update_interval}") && test_ok || test_error
