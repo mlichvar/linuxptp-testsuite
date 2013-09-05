@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with large initial slew"
+
+slave_conf="pi_f_offset_const 0.0"
+
+time_offset=10
+run_ptp4l || test_fail
+check_sync || test_fail
+
+time_offset=-10
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
