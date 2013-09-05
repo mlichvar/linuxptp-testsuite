@@ -22,6 +22,7 @@ fi
 if [ ! -x clknetsim/clknetsim -o ! -e clknetsim/clknetsim.so ]; then
 	pushd clknetsim
 	make || exit 1
+	popd
 fi
 
 export CLKNETSIM_PATH=clknetsim
