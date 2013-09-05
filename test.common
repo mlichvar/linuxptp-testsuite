@@ -32,7 +32,7 @@ export CLKNETSIM_PATH=clknetsim
 default_limit=500
 default_time_offset=1e-1
 default_freq_offset=1e-4
-default_static_delay=1e-7
+default_base_delay=1e-7
 default_jitter=1e-7
 default_wander=1e-9
 default_time_rms_limit=1e-6
@@ -179,7 +179,7 @@ run_ptp4l() {
 
 	generate_config4 $master_node $nodes $time_offset \
 		"$(get_wander_expr)" \
-		"(+ $static_delay (* $jitter (exponential)))"
+		"(+ $base_delay (* $jitter (exponential)))"
 
 	for i in $(seq 1 $nodes); do
 		test_message 2 0 "starting node $i:"
