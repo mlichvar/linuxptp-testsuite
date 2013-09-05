@@ -45,7 +45,7 @@ default_nodes=3
 default_master_node=1
 default_master_start=0.0
 default_slave_start=9.0
-default_rate=0
+default_update_interval=0
 default_master_conf=""
 default_slave_conf=""
 
@@ -154,13 +154,16 @@ print_nondefaults() {
 }
 
 run_ptp4l() {
-	local i
+	local i scaled_wander
 
 	test_message 1 1 "ptp4l test with $nodes nodes:"
 	print_nondefaults
 
+	scaled_wander=$(awk "BEGIN {print $wander / \
+		sqrt($update_interval < 0 ? 2^-($update_interval) : 1)}")
+
 	generate_config4 $master_node $nodes $time_offset \
-		"(+ $freq_offset (sum (* $wander (normal))))" \
+		"(+ $freq_offset (sum (* $scaled_wander (normal))))" \
 		"(+ $static_delay (* $jitter (exponential)))"
 
 	for i in $(seq 1 $nodes); do
@@ -177,7 +180,7 @@ run_ptp4l() {
 	test_message 2 0 "running simulation:"
 
 	start_server $nodes -o tmp/log.offset -f tmp/log.freq \
-		-r $(awk "BEGIN {print $limit / 2 * 2^$rate}") \
-		-l $(awk "BEGIN {print $limit * 2^$rate}") \
-		&& test_ok || test_error
+		-R $(awk "BEGIN {print $update_interval < 0 ? 2^-($update_interval) : 1}") \
+		-r $(awk "BEGIN {print $limit / 2 * 2^$update_interval}") \
+		-l $(awk "BEGIN {print $limit * 2^$update_interval}") && test_ok || test_error
 }
