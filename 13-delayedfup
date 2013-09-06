@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. test.common
+
+# In linuxptp-1.2 and earlier cached followup message was incorrectly
+# paired with sync message when sequence id overflowed
+
+test_start "ptp4l with long delay between sync and followup"
+
+limit=67000
+jitter=0.0
+wander=0.0
+nodes=2
+base_delay="(+ 1e-6 (* 0.5 (+ port -319)))"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
