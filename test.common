@@ -192,6 +192,7 @@ run_ptp4l() {
 			echo "node${i}_start = $slave_start" >> tmp/conf
 			start_client $i ptp4l "$slave_conf" && test_ok || test_error
 		fi
+		[ $? -ne 0 ] && return 1
 	done
 
 	run_simulation
@@ -213,6 +214,7 @@ run_phc2sys() {
 
 		test_message 2 0 "starting node $i:"
 		start_client $i phc2sys "$slave_conf" && test_ok || test_error
+		[ $? -ne 0 ] && return 1
 	done
 	
 	run_simulation
