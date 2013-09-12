@@ -179,7 +179,7 @@ run_ptp4l() {
 	test_message 1 1 "ptp4l test with $nodes nodes:"
 	print_nondefaults
 
-	generate_config4 $master_node $nodes $time_offset \
+	generate_config4 $master_node "$(seq -s ' ' 1 $nodes)" $time_offset \
 		"$(get_wander_expr)" \
 		"(+ $base_delay (* $jitter (exponential)))"
 
