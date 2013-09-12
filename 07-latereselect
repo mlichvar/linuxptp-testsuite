@@ -6,6 +6,9 @@ test_start "ptp4l with late master reselect"
 
 master_start=100.0
 slave_start=0.0
+min_sync_time=120
+max_sync_time=180
+
 run_ptp4l || test_fail
 check_sync || test_fail
 

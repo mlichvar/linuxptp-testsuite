@@ -4,6 +4,8 @@
 
 test_start "ptp4l with various sync intervals"
 
+max_sync_time=300
+
 for i in $(seq -4 2 4); do
 	update_interval=$i
 	master_conf="logSyncInterval $i"
