@@ -91,7 +91,7 @@ test_error() {
 
 msg_lenght=0
 pad_line() {
-	local line_length=40
+	local line_length=56
 	[ $msg_lenght -lt $line_length ] && \
 		printf "%$[$line_length - $msg_lenght]s" ""
 	msg_lenght=0
@@ -118,8 +118,9 @@ test_message() {
 
 check_sync() {
 	local i sync_time max_time_error max_freq_error ret=0
+	local rms_time_error rms_freq_error
 
-	test_message 1 1 "checking clock sync time, time error, freq error:"
+	test_message 1 1 "checking clock sync time, max/rms time/freq error:"
 	
 	for i in $(seq 1 $nodes); do
 		[ $i -eq $master_node ] && continue
@@ -128,12 +129,17 @@ check_sync() {
 			$time_max_limit $freq_max_limit 1.0)
 		max_time_error=$(get_stat 'Maximum absolute offset' $i)
 		max_freq_error=$(get_stat 'Maximum absolute frequency' $i)
+		rms_time_error=$(get_stat 'RMS offset' $i)
+		rms_freq_error=$(get_stat 'RMS frequency' $i)
 
-		test_message 2 0 "node $i: $sync_time $max_time_error $max_freq_error"
+		test_message 2 0 "node $i: $sync_time $(printf '%.2e %.2e %.2e %.2e' \
+			$max_time_error $max_freq_error $rms_time_error $rms_freq_error)"
 
 		check_stat $sync_time $min_sync_time $max_sync_time && \
 			check_stat $max_time_error 0.0 $time_max_limit && \
 			check_stat $max_freq_error 0.0 $freq_max_limit && \
+			check_stat $rms_time_error 0.0 $time_rms_limit && \
+			check_stat $rms_freq_error 0.0 $freq_rms_limit && \
 			test_ok || test_bad
 
 		[ $? -eq 0 ] || ret=1
