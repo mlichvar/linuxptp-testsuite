@@ -42,6 +42,7 @@ default_freq_max_limit=2e-6
 default_min_sync_time=10
 default_max_sync_time=40
 default_nodes=3
+default_subnets=""
 default_master_node=1
 default_master_start=0.0
 default_slave_start=9.0
@@ -172,7 +173,9 @@ get_wander_expr() {
 run_simulation() {
 	test_message 2 0 "running simulation:"
 
-	start_server $nodes -o tmp/log.offset -f tmp/log.freq \
+	start_server $nodes \
+		-n $[$(echo "$subnets" | tr -cd '|' | wc -c) + 1] \
+		-o tmp/log.offset -f tmp/log.freq \
 		$([ $log_packets -ne 0 ] && echo -p tmp/log.packets) \
 		-R $(awk "BEGIN {print $update_interval < 0 ? 2^-($update_interval) : 1}") \
 		-r $(awk "BEGIN {print $max_sync_time * 2^$update_interval}") \
@@ -180,23 +183,31 @@ run_simulation() {
 }
 
 run_ptp4l() {
-	local i
+	local i s subnet ifaces test_subnets
 
 	test_message 1 1 "ptp4l test with $nodes nodes:"
 	print_nondefaults
 
-	generate_config4 $master_node "$(seq -s ' ' 1 $nodes)" $time_offset \
+	[ -z "$subnets" ] && test_subnets=$(seq -s ' ' 1 $nodes) || test_subnets=$subnets
+
+	generate_config4 $master_node "$test_subnets" $time_offset \
 		"$(get_wander_expr)" \
 		"(+ $base_delay (* $jitter (exponential)))"
 
 	for i in $(seq 1 $nodes); do
+		ifaces="" subnet=0
+		for s in $test_subnets; do
+			[ $s = "|" ] && subnet=$[$subnet + 1] && continue
+			[ $s -eq $i ] && ifaces="$ifaces -i eth$subnet"
+		done
+
 		test_message 2 0 "starting node $i:"
 		if [ $i -eq $master_node ]; then
 			echo "node${i}_start = $master_start" >> tmp/conf
-			start_client $i ptp4l "$master_conf" "" "-i eth0" && test_ok || test_error
+			start_client $i ptp4l "$master_conf" "" "$ifaces" && test_ok || test_error
 		else
 			echo "node${i}_start = $slave_start" >> tmp/conf
-			start_client $i ptp4l "$slave_conf" "" "-i eth0" && test_ok || test_error
+			start_client $i ptp4l "$slave_conf" "" "$ifaces" && test_ok || test_error
 		fi
 		[ $? -ne 0 ] && return 1
 	done
