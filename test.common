@@ -120,7 +120,7 @@ check_sync() {
 	local i sync_time max_time_error max_freq_error ret=0
 	local rms_time_error rms_freq_error
 
-	test_message 1 1 "checking clock sync time, max/rms time/freq error:"
+	test_message 2 1 "checking clock sync time, max/rms time/freq error:"
 	
 	for i in $(seq 1 $nodes); do
 		[ $i -eq $master_node ] && continue
@@ -132,7 +132,7 @@ check_sync() {
 		rms_time_error=$(get_stat 'RMS offset' $i)
 		rms_freq_error=$(get_stat 'RMS frequency' $i)
 
-		test_message 2 0 "node $i: $sync_time $(printf '%.2e %.2e %.2e %.2e' \
+		test_message 3 0 "node $i: $sync_time $(printf '%.2e %.2e %.2e %.2e' \
 			$max_time_error $max_freq_error $rms_time_error $rms_freq_error)"
 
 		check_stat $sync_time $min_sync_time $max_sync_time && \
