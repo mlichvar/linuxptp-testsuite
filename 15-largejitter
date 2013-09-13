@@ -1,0 +1,17 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with large jitter"
+
+time_offset=1e0
+jitter=1e-1
+time_max_limit=5e-1
+freq_max_limit=5e-1
+time_rms_limit=1e-1
+freq_rms_limit=1e-1
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
