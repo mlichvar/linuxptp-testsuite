@@ -1,0 +1,16 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with large wander"
+
+wander=1e-4
+time_max_limit=1e-3
+freq_max_limit=1e-3
+time_rms_limit=2e-4
+freq_rms_limit=2e-4
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
