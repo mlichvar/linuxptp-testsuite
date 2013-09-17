@@ -10,6 +10,8 @@ test_start "ptp4l with boundary clocks"
 subnets="1 2 | 2 3 | 2 4 | 3 5 | 4 5 | 5 6 7"
 nodes=7
 max_sync_time=100
+time_max_limit=5e-6
+freq_max_limit=5e-6
 master_conf="clockClass 6"
 
 for master_node in 1 4 7; do
