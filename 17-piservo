@@ -13,8 +13,8 @@ for jitter in 1e-8 1e-7 1e-6 1e-5; do
 	ki=$(awk 'BEGIN {x=1.2 / ('$jitter'/'$wander'); print x < 0.3 ? x : 0.3}')
 	time_rms_limit=$(awk 'BEGIN {print 1.5e-8 * ('$jitter'/1e-8)**0.75}')
 	freq_rms_limit=$(awk 'BEGIN {print 1.5e-8 * ('$jitter'/1e-8)**0.5}')
-	time_max_limit=$(awk 'BEGIN {print 5 * '$time_rms_limit'}')
-	freq_max_limit=$(awk 'BEGIN {print 5 * '$freq_rms_limit'}')
+	time_max_limit=$(awk 'BEGIN {print 8 * '$time_rms_limit'}')
+	freq_max_limit=$(awk 'BEGIN {print 8 * '$freq_rms_limit'}')
 
 	master_conf=""
 	slave_conf="-P $kp -I $ki"
