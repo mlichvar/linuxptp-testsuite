@@ -55,7 +55,7 @@ default_extra_ptp4l_options=""
 for defopt in $(declare | grep '^default_'); do
 	defoptname=${defopt%%=*}
 	optname=${defoptname#default_}
-	eval "$optname=\"\$$defoptname\""
+	eval "[ -z \"\${$optname:+a}\" ] && $optname=\"\$$defoptname\""
 done
 
 test_start() {
