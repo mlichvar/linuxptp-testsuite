@@ -46,6 +46,8 @@ default_subnets=""
 default_master_node=1
 default_master_start=0.0
 default_slave_start=9.0
+default_master_step=""
+default_slave_step=""
 default_update_interval=0
 default_log_packets=0
 default_master_conf=""
@@ -206,10 +208,13 @@ run_ptp4l() {
 		if [ $i -eq $master_node ]; then
 			start=$master_start
 			conf=$master_conf
+			step=$master_step
 		else
 			start=$slave_start
 			conf=$slave_conf
+			step=$slave_step
 		fi
+		[ -z "$step" ] || echo "node${i}_step = $step" >> tmp/conf
 		echo "node${i}_start = $start" >> tmp/conf
 		start_client $i ptp4l "$conf" "" "$ifaces $extra_ptp4l_options" && \
 			test_ok || test_error
