@@ -6,7 +6,7 @@ test_start "ptp4l with software time stamping"
 
 limit=2000
 min_sync_time=50
-max_sync_time=150
+max_sync_time=300
 
 master_conf="time_stamping software"
 slave_conf="time_stamping software"
