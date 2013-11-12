@@ -46,14 +46,17 @@ default_max_ptp4l_delay_limit=1e-4
 default_nodes=3
 default_subnets=""
 default_master_node=1
+default_pmc_node=0
 default_master_start=0.0
 default_slave_start=9.0
+default_pmc_start=50.0
 default_master_step=""
 default_slave_step=""
 default_update_interval=0
 default_log_packets=0
 default_master_conf=""
 default_slave_conf=""
+default_pmc_conf=""
 default_extra_ptp4l_options=""
 
 for defopt in $(declare | grep '^default_'); do
@@ -130,6 +133,7 @@ check_sync() {
 	
 	for i in $(seq 1 $nodes); do
 		[ $i -eq $master_node ] && continue
+		[ $i -eq $pmc_node ] && continue
 
 		sync_time=$(find_sync tmp/log.offset tmp/log.freq $i \
 			$time_max_limit $freq_max_limit 1.0)
@@ -161,6 +165,7 @@ check_ptp4l_delay() {
 
 	for i in $(seq 1 $nodes); do
 		[ $i -eq $master_node ] && continue
+		[ $i -eq $pmc_node ] && continue
 
 		max_delay=$(grep -oE 'path delay *[-0-9]+ +[-0-9]+$' tmp/log.$i | awk '
 			BEGIN {
@@ -183,6 +188,12 @@ check_ptp4l_delay() {
 	return $ret
 }
 	
+check_pmc_output() {
+	local pattern=$1
+	test_message 2 0 "checking pmc output:"
+	[[ "$(cat tmp/log.$pmc_node)" =~ $pattern ]] && test_ok || test_bad
+}
+
 print_nondefaults() {
 	local defopt defoptname optname
 
@@ -224,7 +235,7 @@ run_ptp4l() {
 
 	[ -z "$subnets" ] && test_subnets=$(seq -s ' ' 1 $nodes) || test_subnets=$subnets
 
-	generate_config4 $master_node "$test_subnets" $time_offset \
+	generate_config4 "$master_node $pmc_node" "$test_subnets" $time_offset \
 		"$(get_wander_expr)" \
 		"(+ $base_delay (* $jitter (exponential)))"
 
@@ -236,19 +247,24 @@ run_ptp4l() {
 		done
 
 		test_message 2 0 "starting node $i:"
-		if [ $i -eq $master_node ]; then
-			start=$master_start
-			conf=$master_conf
-			step=$master_step
+		if [ $i -eq $pmc_node ]; then
+			echo "node${i}_start = $pmc_start" >> tmp/conf
+			start_client $i pmc "$pmc_conf" && test_ok || test_error
 		else
-			start=$slave_start
-			conf=$slave_conf
-			step=$slave_step
+			if [ $i -eq $master_node ]; then
+				start=$master_start
+				conf=$master_conf
+				step=$master_step
+			else
+				start=$slave_start
+				conf=$slave_conf
+				step=$slave_step
+			fi
+			[ -z "$step" ] || echo "node${i}_step = $step" >> tmp/conf
+			echo "node${i}_start = $start" >> tmp/conf
+			start_client $i ptp4l "$conf" "" "$ifaces $extra_ptp4l_options" && \
+				test_ok || test_error
 		fi
-		[ -z "$step" ] || echo "node${i}_step = $step" >> tmp/conf
-		echo "node${i}_start = $start" >> tmp/conf
-		start_client $i ptp4l "$conf" "" "$ifaces $extra_ptp4l_options" && \
-			test_ok || test_error
 
 		[ $? -ne 0 ] && return 1
 	done
