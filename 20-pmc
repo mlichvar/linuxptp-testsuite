@@ -1,0 +1,234 @@
+#!/bin/bash
+
+. test.common
+
+test_start "pmc"
+
+limit=51
+jitter=0.0
+subnets="1 2 | 2 3"
+pmc_node=3
+
+requests_replies=(
+"GET USER_DESCRIPTION"
+"sending: GET USER_DESCRIPTION
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT USER_DESCRIPTION 
+		userDescription  "
+
+"GET DEFAULT_DATA_SET"
+"sending: GET DEFAULT_DATA_SET
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT DEFAULT_DATA_SET 
+		twoStepFlag             1
+		slaveOnly               0
+		numberPorts             2
+		priority1               128
+		clockClass              248
+		clockAccuracy           0xfe
+		offsetScaledLogVariance 0xffff
+		priority2               128
+		clockIdentity           123456\.fffe\.780102
+		domainNumber            0"
+
+"GET CURRENT_DATA_SET"
+"sending: GET CURRENT_DATA_SET
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT CURRENT_DATA_SET 
+		stepsRemoved     1
+		offsetFromMaster -?[0-9]+\.[0-9]+
+		meanPathDelay    [0-9]+\.[0-9]+"
+
+"GET PARENT_DATA_SET"
+"sending: GET PARENT_DATA_SET
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT PARENT_DATA_SET 
+		parentPortIdentity                    123456\.fffe\.780101-1
+		parentStats                           0
+		observedParentOffsetScaledLogVariance 0xffff
+		observedParentClockPhaseChangeRate    0x7fffffff
+		grandmasterPriority1                  128
+		gm\.ClockClass                         248
+		gm\.ClockAccuracy                      0xfe
+		gm\.OffsetScaledLogVariance            0xffff
+		grandmasterPriority2                  128
+		grandmasterIdentity                   123456\.fffe\.780101"
+
+"GET TIME_PROPERTIES_DATA_SET"
+"sending: GET TIME_PROPERTIES_DATA_SET
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT TIME_PROPERTIES_DATA_SET 
+		currentUtcOffset      35
+		leap61                0
+		leap59                0
+		currentUtcOffsetValid 0
+		ptpTimescale          1
+		timeTraceable         0
+		frequencyTraceable    0
+		timeSource            0xa0"
+
+"GET PRIORITY1"
+"sending: GET PRIORITY1
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT PRIORITY1 
+		priority1 128"
+
+"GET PRIORITY2"
+"sending: GET PRIORITY2
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT PRIORITY2 
+		priority2 128"
+
+"GET DOMAIN"
+"sending: GET DOMAIN
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT DOMAIN 
+		domainNumber 0"
+
+"GET SLAVE_ONLY"
+"sending: GET SLAVE_ONLY
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT SLAVE_ONLY 
+		slaveOnly 0"
+
+"GET CLOCK_ACCURACY"
+"sending: GET CLOCK_ACCURACY
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT CLOCK_ACCURACY 
+		clockAccuracy 0xfe"
+
+"GET TRACEABILITY_PROPERTIES"
+"sending: GET TRACEABILITY_PROPERTIES
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT TRACEABILITY_PROPERTIES 
+		timeTraceable      0
+		frequencyTraceable 0"
+
+"GET TIMESCALE_PROPERTIES"
+"sending: GET TIMESCALE_PROPERTIES
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT TIMESCALE_PROPERTIES 
+		ptpTimescale 1"
+
+"GET TIME_STATUS_NP"
+"sending: GET TIME_STATUS_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT TIME_STATUS_NP 
+		master_offset              -?[0-9]+
+		ingress_time               1262304[0-9]+
+		cumulativeScaledRateOffset \+1\.000000000
+		scaledLastGmPhaseChange    0
+		gmTimeBaseIndicator        0
+		lastGmPhaseChange          0x0000'0000000000000000\.0000
+		gmPresent                  true
+		gmIdentity                 123456\.fffe\.780101"
+
+# SET is allowed only over UDS
+"GET GRANDMASTER_SETTINGS_NP
+SET GRANDMASTER_SETTINGS_NP clockClass 6 clockAccuracy 0xfd offsetScaledLogVariance 0xfffe currentUtcOffset 36 leap61 1 leap59 0 currentUtcOffsetValid 1 ptpTimescale 0 timeTraceable 1 frequencyTraceable 1 timeSource 0xa1"
+"sending: GET GRANDMASTER_SETTINGS_NP
+sending: SET GRANDMASTER_SETTINGS_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT GRANDMASTER_SETTINGS_NP 
+		clockClass              248
+		clockAccuracy           0xfe
+		offsetScaledLogVariance 0xffff
+		currentUtcOffset        35
+		leap61                  0
+		leap59                  0
+		currentUtcOffsetValid   0
+		ptpTimescale            1
+		timeTraceable           0
+		frequencyTraceable      0
+		timeSource              0xa0
+	123456\.fffe\.780102-1 seq 1 RESPONSE MANAGMENT_ERROR_STATUS "
+
+"GET NULL_MANAGEMENT"
+"sending: GET NULL_MANAGEMENT
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT "
+
+"GET CLOCK_DESCRIPTION"
+"sending: GET CLOCK_DESCRIPTION
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT CLOCK_DESCRIPTION 
+		clockType             0x4000
+		physicalLayerProtocol IEEE 802\.3
+		physicalAddress       12:34:56:78:01:02
+		protocolAddress       1 192\.168\.123\.2
+		manufacturerId        00:00:00
+		productDescription    ;;
+		revisionData          ;;
+		userDescription       
+		profileId             00:1b:19:00:01:00
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT CLOCK_DESCRIPTION 
+		clockType             0x4000
+		physicalLayerProtocol IEEE 802\.3
+		physicalAddress       12:34:56:78:02:02
+		protocolAddress       1 192\.168\.124\.2
+		manufacturerId        00:00:00
+		productDescription    ;;
+		revisionData          ;;
+		userDescription       
+		profileId             00:1b:19:00:01:00"
+
+"GET PORT_DATA_SET"
+"sending: GET PORT_DATA_SET
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780102-1
+		portState               SLAVE
+		logMinDelayReqInterval  0
+		peerMeanPathDelay       0
+		logAnnounceInterval     1
+		announceReceiptTimeout  3
+		logSyncInterval         0
+		delayMechanism          1
+		logMinPdelayReqInterval 0
+		versionNumber           2
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780102-2
+		portState               MASTER
+		logMinDelayReqInterval  0
+		peerMeanPathDelay       0
+		logAnnounceInterval     1
+		announceReceiptTimeout  3
+		logSyncInterval         0
+		delayMechanism          1
+		logMinPdelayReqInterval 0
+		versionNumber           2"
+
+"GET LOG_ANNOUNCE_INTERVAL"
+"sending: GET LOG_ANNOUNCE_INTERVAL
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT LOG_ANNOUNCE_INTERVAL 
+		logAnnounceInterval 1
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT LOG_ANNOUNCE_INTERVAL 
+		logAnnounceInterval 1"
+
+"GET ANNOUNCE_RECEIPT_TIMEOUT"
+"sending: GET ANNOUNCE_RECEIPT_TIMEOUT
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT ANNOUNCE_RECEIPT_TIMEOUT 
+		announceReceiptTimeout 3
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT ANNOUNCE_RECEIPT_TIMEOUT 
+		announceReceiptTimeout 3"
+
+"GET LOG_SYNC_INTERVAL"
+"sending: GET LOG_SYNC_INTERVAL
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT ANNOUNCE_RECEIPT_TIMEOUT 
+		logSyncInterval 0
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT ANNOUNCE_RECEIPT_TIMEOUT 
+		logSyncInterval 0"
+
+"GET VERSION_NUMBER"
+"sending: GET VERSION_NUMBER
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT VERSION_NUMBER 
+		versionNumber 2
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT VERSION_NUMBER 
+		versionNumber 2"
+
+"GET DELAY_MECHANISM"
+"sending: GET DELAY_MECHANISM
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT DELAY_MECHANISM 
+		delayMechanism 1
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT DELAY_MECHANISM 
+		delayMechanism 1"
+
+"GET LOG_MIN_PDELAY_REQ_INTERVAL"
+"sending: GET LOG_MIN_PDELAY_REQ_INTERVAL
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT LOG_MIN_PDELAY_REQ_INTERVAL 
+		logMinPdelayReqInterval 0
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT LOG_MIN_PDELAY_REQ_INTERVAL 
+		logMinPdelayReqInterval 0"
+)
+
+for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
+	pmc_conf=${requests_replies[$[i * 2]]}
+	run_ptp4l || test_fail
+	check_pmc_output "^${requests_replies[$[i * 2 + 1]]}$" || test_fail
+done
+
+test_pass
