@@ -5,8 +5,8 @@
 test_start "ptp4l with large initial slew"
 
 slave_conf="pi_f_offset_const 0.0"
-min_sync_time=140
-max_sync_time=170
+min_sync_time=330
+max_sync_time=360
 
 time_offset=10
 run_ptp4l || test_fail

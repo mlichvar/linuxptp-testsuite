@@ -4,6 +4,11 @@
 
 test_start "ptp4l with large frequency offsets"
 
+# System clock allows larger frequency adjustment
+master_conf="time_stamping software"
+slave_conf="time_stamping software
+pi_proportional_scale 0.7
+pi_integral_scale 0.3"
 max_sync_time=80
 
 freq_offset=$(awk 'BEGIN { print 1 / 0.91 - 1 }')
