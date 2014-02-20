@@ -228,7 +228,10 @@ sending: SET GRANDMASTER_SETTINGS_NP
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
 	pmc_conf=${requests_replies[$[i * 2]]}
 	run_ptp4l || test_fail
-	check_pmc_output "^${requests_replies[$[i * 2 + 1]]}$" || test_fail
+	if ! check_pmc_output "^${requests_replies[$[i * 2 + 1]]}$"; then
+		cat tmp/log.$pmc_node
+		test_fail
+	fi
 done
 
 test_pass
