@@ -98,12 +98,12 @@ test_error() {
 	return 1
 }
 
-msg_lenght=0
+msg_length=0
 pad_line() {
 	local line_length=56
-	[ $msg_lenght -lt $line_length ] && \
-		printf "%$[$line_length - $msg_lenght]s" ""
-	msg_lenght=0
+	[ $msg_length -lt $line_length ] && \
+		printf "%$[$line_length - $msg_length]s" ""
+	msg_length=0
 }
 
 test_message() {
@@ -114,14 +114,14 @@ test_message() {
 	while [ $level -gt 0 ]; do
 		echo -n "  "
 		level=$[$level - 1]
-		msg_lenght=$[$msg_lenght + 2]
+		msg_length=$[$msg_length + 2]
 	done
 	echo -n "$msg"
 
-	msg_lenght=$[$msg_lenght + ${#msg}]
+	msg_length=$[$msg_length + ${#msg}]
 	if [ $eol -ne 0 ]; then
 		echo
-		msg_lenght=0
+		msg_length=0
 	fi
 }
 
