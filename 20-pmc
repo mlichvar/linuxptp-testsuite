@@ -103,7 +103,7 @@ requests_replies=(
 	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGMENT TIME_STATUS_NP 
 		master_offset              -?[0-9]+
 		ingress_time               1262304[0-9]+
-		cumulativeScaledRateOffset \+1\.000000000
+		cumulativeScaledRateOffset \+0\.000000000
 		scaledLastGmPhaseChange    0
 		gmTimeBaseIndicator        0
 		lastGmPhaseChange          0x0000'0000000000000000\.0000
