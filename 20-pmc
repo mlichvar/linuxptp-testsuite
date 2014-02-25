@@ -223,6 +223,19 @@ sending: SET GRANDMASTER_SETTINGS_NP
 		logMinPdelayReqInterval 0
 	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGMENT LOG_MIN_PDELAY_REQ_INTERVAL 
 		logMinPdelayReqInterval 0"
+
+# SET is allowed only over UDS
+"GET PORT_DATA_SET_NP
+SET PORT_DATA_SET_NP neighborPropDelayThresh 20000000 asCapable 1"
+"sending: GET PORT_DATA_SET_NP
+sending: SET PORT_DATA_SET_NP
+	123456.fffe.780102-1 seq 0 RESPONSE MANAGMENT PORT_DATA_SET_NP 
+		neighborPropDelayThresh 20000000
+		asCapable               1
+	123456.fffe.780102-2 seq 0 RESPONSE MANAGMENT PORT_DATA_SET_NP 
+		neighborPropDelayThresh 20000000
+		asCapable               1
+	123456.fffe.780102-1 seq 1 RESPONSE MANAGMENT_ERROR_STATUS "
 )
 
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
