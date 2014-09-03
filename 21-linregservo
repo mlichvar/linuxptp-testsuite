@@ -1,0 +1,33 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l and phc2sys with linreg servo"
+
+wander=1e-9
+limit=4000
+max_sync_time=2000
+
+while read jitter time_max_limit freq_max_limit time_rms_limit freq_rms_limit; do
+	master_conf=""
+	slave_conf="-E linreg"
+	nodes=1
+	master_node=0
+	run_phc2sys || test_fail
+	check_sync || test_fail
+
+	master_conf="delay_mechanism P2P"
+	slave_conf="delay_mechanism P2P
+		clock_servo linreg"
+	nodes=2
+	master_node=1
+	run_ptp4l || test_fail
+	check_sync || test_fail
+done <<-EOF
+	1e-5 4.0e-05 4.8e-05 6.1e-06 1.5e-06
+	1e-6 4.2e-06 4.4e-06 7.0e-07 1.8e-07
+	1e-7 5.1e-07 7.5e-07 1.1e-07 3.3e-08
+	1e-8 9.5e-08 9.3e-08 1.9e-08 1.3e-08
+EOF
+
+test_pass
