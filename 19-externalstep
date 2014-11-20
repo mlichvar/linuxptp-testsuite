@@ -8,13 +8,19 @@ test_start "ptp4l with external clock step"
 # the step between the sync and delay request messages
 freq_offset=0.0
 master_start=0.9
-slave_conf="pi_offset_const 10.0"
 # 100s step in 100th second
 slave_step="(* 100 (equal 0.1 (sum 1.0) 100))"
 min_sync_time=100
 max_sync_time=110
 nodes=6
 
+slave_conf="clock_servo pi
+step_threshold 10.0"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+slave_conf="clock_servo linreg
+step_threshold 10.0"
 run_ptp4l || test_fail
 check_sync || test_fail
 
