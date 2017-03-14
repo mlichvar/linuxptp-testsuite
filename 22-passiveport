@@ -1,0 +1,23 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with passive ports"
+
+subnets="1 2 | 1 2 | 1 2"
+nodes=2
+limit=2000
+time_max_limit=5e-6
+freq_max_limit=5e-6
+base_delay=$(cat <<-EOF | tr -d '\n'
+  (+ $default_base_delay
+    (* -1 (equal 0.1 subnet 1) (equal 0.1 (min (% (+ time 0) 300) 150) 150))
+    (* -1 (equal 0.1 subnet 2) (equal 0.1 (min (% (+ time 100) 300) 150) 150))
+    (* -1 (equal 0.1 subnet 3) (equal 0.1 (min (% (+ time 200) 300) 150) 150)))
+EOF
+)
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
