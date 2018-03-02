@@ -249,7 +249,8 @@ run_ptp4l() {
 		test_message 2 0 "starting node $i:"
 		if [ $i -eq $pmc_node ]; then
 			echo "node${i}_start = $pmc_start" >> tmp/conf
-			start_client $i pmc "$pmc_conf" && test_ok || test_error
+			start_client $i pmc "$pmc_conf" "" "-b 0 $ifaces" && \
+				test_ok || test_error
 		else
 			if [ $i -eq $master_node ]; then
 				start=$master_start

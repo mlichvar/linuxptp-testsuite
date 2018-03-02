@@ -12,12 +12,12 @@ pmc_node=3
 requests_replies=(
 "GET USER_DESCRIPTION"
 "sending: GET USER_DESCRIPTION
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT USER_DESCRIPTION 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT USER_DESCRIPTION 
 		userDescription  "
 
 "GET DEFAULT_DATA_SET"
 "sending: GET DEFAULT_DATA_SET
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT DEFAULT_DATA_SET 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT DEFAULT_DATA_SET 
 		twoStepFlag             1
 		slaveOnly               0
 		numberPorts             2
@@ -31,14 +31,14 @@ requests_replies=(
 
 "GET CURRENT_DATA_SET"
 "sending: GET CURRENT_DATA_SET
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT CURRENT_DATA_SET 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT CURRENT_DATA_SET 
 		stepsRemoved     1
 		offsetFromMaster -?[0-9]+\.[0-9]+
 		meanPathDelay    [0-9]+\.[0-9]+"
 
 "GET PARENT_DATA_SET"
 "sending: GET PARENT_DATA_SET
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT PARENT_DATA_SET 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT PARENT_DATA_SET 
 		parentPortIdentity                    123456\.fffe\.780101-1
 		parentStats                           0
 		observedParentOffsetScaledLogVariance 0xffff
@@ -52,7 +52,7 @@ requests_replies=(
 
 "GET TIME_PROPERTIES_DATA_SET"
 "sending: GET TIME_PROPERTIES_DATA_SET
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT TIME_PROPERTIES_DATA_SET 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT TIME_PROPERTIES_DATA_SET 
 		currentUtcOffset      3[567]
 		leap61                0
 		leap59                0
@@ -64,43 +64,43 @@ requests_replies=(
 
 "GET PRIORITY1"
 "sending: GET PRIORITY1
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT PRIORITY1 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT PRIORITY1 
 		priority1 128"
 
 "GET PRIORITY2"
 "sending: GET PRIORITY2
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT PRIORITY2 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT PRIORITY2 
 		priority2 128"
 
 "GET DOMAIN"
 "sending: GET DOMAIN
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT DOMAIN 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT DOMAIN 
 		domainNumber 0"
 
 "GET SLAVE_ONLY"
 "sending: GET SLAVE_ONLY
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT SLAVE_ONLY 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT SLAVE_ONLY 
 		slaveOnly 0"
 
 "GET CLOCK_ACCURACY"
 "sending: GET CLOCK_ACCURACY
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT CLOCK_ACCURACY 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT CLOCK_ACCURACY 
 		clockAccuracy 0xfe"
 
 "GET TRACEABILITY_PROPERTIES"
 "sending: GET TRACEABILITY_PROPERTIES
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT TRACEABILITY_PROPERTIES 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT TRACEABILITY_PROPERTIES 
 		timeTraceable      0
 		frequencyTraceable 0"
 
 "GET TIMESCALE_PROPERTIES"
 "sending: GET TIMESCALE_PROPERTIES
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT TIMESCALE_PROPERTIES 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT TIMESCALE_PROPERTIES 
 		ptpTimescale 1"
 
 "GET TIME_STATUS_NP"
 "sending: GET TIME_STATUS_NP
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT TIME_STATUS_NP 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT TIME_STATUS_NP 
 		master_offset              -?[0-9]+
 		ingress_time               1262304[0-9]+
 		cumulativeScaledRateOffset \+0\.000000000
@@ -115,7 +115,7 @@ requests_replies=(
 SET GRANDMASTER_SETTINGS_NP clockClass 6 clockAccuracy 0xfd offsetScaledLogVariance 0xfffe currentUtcOffset 36 leap61 1 leap59 0 currentUtcOffsetValid 1 ptpTimescale 0 timeTraceable 1 frequencyTraceable 1 timeSource 0xa1"
 "sending: GET GRANDMASTER_SETTINGS_NP
 sending: SET GRANDMASTER_SETTINGS_NP
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT GRANDMASTER_SETTINGS_NP 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT GRANDMASTER_SETTINGS_NP 
 		clockClass              248
 		clockAccuracy           0xfe
 		offsetScaledLogVariance 0xffff
@@ -127,7 +127,7 @@ sending: SET GRANDMASTER_SETTINGS_NP
 		timeTraceable           0
 		frequencyTraceable      0
 		timeSource              0xa0
-	123456\.fffe\.780102-1 seq 1 RESPONSE MANAGE?MENT_ERROR_STATUS "
+	123456\.fffe\.780102-2 seq 1 RESPONSE MANAGE?MENT_ERROR_STATUS "
 
 "GET NULL_MANAGEMENT"
 "sending: GET NULL_MANAGEMENT
@@ -235,7 +235,7 @@ sending: SET PORT_DATA_SET_NP
 	123456.fffe.780102-2 seq 0 RESPONSE MANAGE?MENT PORT_DATA_SET_NP 
 		neighborPropDelayThresh 20000000
 		asCapable               1
-	123456.fffe.780102-1 seq 1 RESPONSE MANAGE?MENT_ERROR_STATUS "
+	123456.fffe.780102-2 seq 1 RESPONSE MANAGE?MENT_ERROR_STATUS "
 )
 
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
