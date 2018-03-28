@@ -2,13 +2,14 @@
 
 . test.common
 
-test_start "ptp4l with various sync intervals"
+test_start "ptp4l with various sync and delay intervals"
 
 max_sync_time=320
 
 for i in $(seq -4 2 4); do
 	update_interval=$i
-	master_conf="logSyncInterval $i"
+	master_conf="logSyncInterval $i
+		     logMinDelayReqInterval $i"
 	freq_max_limit=$(awk 'BEGIN {print 2e-6 / (2**'$i')**0.5}')
 	run_ptp4l || test_fail
 	check_sync || test_fail
