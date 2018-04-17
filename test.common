@@ -47,9 +47,11 @@ default_nodes=3
 default_subnets=""
 default_master_node=1
 default_pmc_node=0
+default_nsm_node=0
 default_master_start=0.0
 default_slave_start=9.0
 default_pmc_start=50.0
+default_nsm_start=50.0
 default_master_step=""
 default_slave_step=""
 default_update_interval=0
@@ -57,6 +59,7 @@ default_log_packets=0
 default_master_conf=""
 default_slave_conf=""
 default_pmc_conf=""
+default_nsm_conf=""
 default_extra_ptp4l_options=""
 
 for defopt in $(declare | grep '^default_'); do
@@ -194,6 +197,12 @@ check_pmc_output() {
 	[[ "$(cat tmp/log.$pmc_node)" =~ $pattern ]] && test_ok || test_bad
 }
 
+check_nsm_output() {
+	local pattern=$1
+	test_message 2 0 "checking nsm output:"
+	[[ "$(cat tmp/log.$nsm_node)" =~ $pattern ]] && test_ok || test_bad
+}
+
 print_nondefaults() {
 	local defopt defoptname optname
 
@@ -235,7 +244,7 @@ run_ptp4l() {
 
 	[ -z "$subnets" ] && test_subnets=$(seq -s ' ' 1 $nodes) || test_subnets=$subnets
 
-	generate_config4 "$master_node $pmc_node" "$test_subnets" $time_offset \
+	generate_config4 "$master_node $pmc_node $nsm_node" "$test_subnets" $time_offset \
 		"$(get_wander_expr)" \
 		"(+ $base_delay (* $jitter (exponential)))"
 
@@ -251,6 +260,10 @@ run_ptp4l() {
 			echo "node${i}_start = $pmc_start" >> tmp/conf
 			start_client $i pmc "$pmc_conf" "" "-b 0 $ifaces" && \
 				test_ok || test_error
+		elif [ $i -eq $nsm_node ]; then
+			echo "node${i}_start = $nsm_start" >> tmp/conf
+			start_client $i nsm "$nsm_conf" "" "$ifaces" && \
+				test_ok || test_error	
 		else
 			if [ $i -eq $master_node ]; then
 				start=$master_start
