@@ -1,0 +1,85 @@
+#!/bin/bash
+
+. test.common
+
+test_start "nsm monitoring master node and slave node"
+nsm_node=3
+master_conf="hybrid_e2e 1
+net_sync_monitor 1"
+slave_conf="hybrid_e2e 1
+net_sync_monitor 1"
+
+requests_replies=(
+"NSM 192.168.123.1"
+"NSM MEASUREMENT COMPLETE
+		offset                                -?[0-9]+
+		portState                             MASTER
+		parentPortAddress                     1 192.168.123.1
+	parentDataset
+		parentPortIdentity                    123456.fffe.780101-0
+		parentStats                           0
+		observedParentOffsetScaledLogVariance 0xffff
+		observedParentClockPhaseChangeRate    0x7fffffff
+		grandmasterPriority1                  128
+		gm.ClockClass                         248
+		gm.ClockAccuracy                      0xfe
+		gm.OffsetScaledLogVariance            0xffff
+		grandmasterPriority2                  128
+		grandmasterIdentity                   123456.fffe.780101
+	currentDataset
+		stepsRemoved                          0
+		offsetFromMaster                      0.0
+		meanPathDelay                         0.0
+	timePropertiesDataset
+		currentUtcOffset                      [0-9]+
+		leap61                                0
+		leap59                                0
+		currentUtcOffsetValid                 0
+		ptpTimescale                          1
+		timeTraceable                         0
+		frequencyTraceable                    0
+		timeSource                            0xa0
+	lastSyncTimestamp    0.000000000"
+
+"NSM 192.168.123.2"
+"NSM MEASUREMENT COMPLETE
+		offset                                -?[0-9]+
+		portState                             SLAVE
+		parentPortAddress                     1 192.168.123.1
+	parentDataset
+		parentPortIdentity                    123456.fffe.780101-1
+		parentStats                           0
+		observedParentOffsetScaledLogVariance 0xffff
+		observedParentClockPhaseChangeRate    0x7fffffff
+		grandmasterPriority1                  128
+		gm.ClockClass                         248
+		gm.ClockAccuracy                      0xfe
+		gm.OffsetScaledLogVariance            0xffff
+		grandmasterPriority2                  128
+		grandmasterIdentity                   123456.fffe.780101
+	currentDataset
+		stepsRemoved                          1
+		offsetFromMaster                      -?[0-9]+\.[0-9]+
+		meanPathDelay                         [0-9]+\.[0-9]+
+	timePropertiesDataset
+		currentUtcOffset                      [0-9]+
+		leap61                                0
+		leap59                                0
+		currentUtcOffsetValid                 0
+		ptpTimescale                          1
+		timeTraceable                         0
+		frequencyTraceable                    0
+		timeSource                            0xa0
+	lastSyncTimestamp    [0-9]+\.[0-9]+"
+)
+
+for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
+	nsm_conf=${requests_replies[$[i * 2]]}
+	run_ptp4l || test_fail
+	if ! check_nsm_output "${requests_replies[$[i * 2 + 1]]}$"; then
+		cat tmp/log.$nsm_node
+		test_fail
+	fi
+done
+
+test_pass
