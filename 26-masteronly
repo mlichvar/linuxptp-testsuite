@@ -1,0 +1,27 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with masterOnly option"
+
+nodes=3
+pmc_node=3
+
+# The masterOnly option is set to prevent the port of the second node
+# from entering the SLAVE state. The portState will then become MASTER 
+# for both first and second node.
+slave_conf="masterOnly 1"
+pmc_conf="GET PORT_DATA_SET"
+
+run_ptp4l || test_fail
+
+expected1="123456\.fffe\.780101-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780101-1
+		portState               MASTER"
+expected2="123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780102-1
+		portState               MASTER"
+check_pmc_output "$expected1" || test_fail
+check_pmc_output "$expected2" || test_fail
+
+test_pass
