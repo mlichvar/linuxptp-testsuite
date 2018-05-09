@@ -1,0 +1,74 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with telecom dscmp and various local priority"
+nodes=3
+pmc_node=3
+pmc_conf="GET PORT_DATA_SET"
+
+generate_config4 "1" "1 2 3" 0.01 "(sum (* 1e-9 (normal)))" "(* 1e-8 (exponential))"
+echo 'node1_start = 0' >> tmp/conf
+echo 'node2_start = 0' >> tmp/conf
+echo 'node3_start = 50' >> tmp/conf
+
+
+# Using telecom_dscmp with default priorities
+node1_conf="dataset_comparison	G.8275.x"
+node2_conf="dataset_comparison	G.8275.x"
+start_client 1 ptp4l "$node1_conf" "" "-i eth0" && test_ok || test_error
+start_client 2 ptp4l "$node2_conf" "" "-i eth0" && test_ok || test_error
+start_client 3 pmc "$pmc_conf" && test_ok || test_error
+start_server 3 -l 110
+
+expected_node1="123456\.fffe\.780101-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780101-1
+		portState               MASTER"
+expected_node2="123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780102-1
+		portState               SLAVE"
+check_pmc_output "$expected_node1" || test_fail
+check_pmc_output "$expected_node2" || test_fail
+
+
+# Using telecom_dscmp with clock localPriority set
+node1_conf="dataset_comparison	G.8275.x"
+node2_conf="dataset_comparison	G.8275.x
+G.8275.defaultDS.localPriority 127"
+
+start_client 1 ptp4l "$node1_conf" "" "-i eth0" && test_ok || test_error
+start_client 2 ptp4l "$node2_conf" "" "-i eth0" && test_ok || test_error
+start_client 3 pmc "$pmc_conf" && test_ok || test_error
+start_server 3 -l 110
+
+expected_node1="123456\.fffe\.780101-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780101-1
+		portState               MASTER"
+expected_node2="123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780102-1
+		portState               MASTER"
+check_pmc_output "$expected_node1" || test_fail
+check_pmc_output "$expected_node2" || test_fail
+
+
+# Using telecom_dscmp with port localPriority set for node 2
+node1_conf="dataset_comparison	G.8275.x"
+node2_conf="dataset_comparison	G.8275.x
+G.8275.portDS.localPriority	129"
+
+start_client 1 ptp4l "$node1_conf" "" "-i eth0" && test_ok || test_error
+start_client 2 ptp4l "$node2_conf" "" "-i eth0" && test_ok || test_error
+start_client 3 pmc "$pmc_conf" && test_ok || test_error
+start_server 3 -l 110
+
+expected_node1="123456\.fffe\.780101-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780101-1
+		portState               MASTER"
+expected_node2="123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET 
+		portIdentity            123456\.fffe\.780102-1
+		portState               MASTER"
+check_pmc_output "$expected_node1" || test_fail
+check_pmc_output "$expected_node2" || test_fail
+
+
+test_pass
