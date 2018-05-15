@@ -46,6 +46,8 @@ default_max_ptp4l_delay_limit=1e-4
 default_nodes=3
 default_subnets=""
 default_master_node=1
+default_transparent_nodes=""
+default_free_running_nodes=""
 default_pmc_node=0
 default_nsm_node=0
 default_master_start=0.0
@@ -58,6 +60,7 @@ default_update_interval=0
 default_log_packets=0
 default_master_conf=""
 default_slave_conf=""
+default_transparent_conf=""
 default_pmc_conf=""
 default_nsm_conf=""
 default_extra_ptp4l_options=""
@@ -138,6 +141,7 @@ check_sync() {
 		[ $i -eq $master_node ] && continue
 		[ $i -eq $pmc_node ] && continue
 		[ $i -eq $nsm_node ] && continue
+		[[ " $free_running_nodes " =~ [^0-9]$i[^0-9] ]] && continue
 
 		sync_time=$(find_sync tmp/log.offset tmp/log.freq $i \
 			$time_max_limit $freq_max_limit 1.0)
@@ -267,7 +271,11 @@ run_ptp4l() {
 			start_client $i nsm "$nsm_conf" "" "$ifaces" && \
 				test_ok || test_error
 		else
-			if [ $i -eq $master_node ]; then
+			if [[ " $transparent_nodes " =~ [^0-9]$i[^0-9] ]]; then
+				start=$slave_start
+				conf=$transparent_conf
+				step=$slave_step
+			elif [ $i -eq $master_node ]; then
 				start=$master_start
 				conf=$master_conf
 				step=$master_step

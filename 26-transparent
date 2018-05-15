@@ -1,0 +1,37 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with transparent clocks"
+
+# 1 --- 2 --- 3
+#       |     |
+#       4 --- 5 --- 6
+subnets="1 2 | 2 3 | 2 4 | 3 5 | 4 5 | 5 6"
+nodes=6
+max_sync_time=100
+time_max_limit=5e-6
+freq_max_limit=5e-6
+master_conf="clockClass 6"
+
+for tc_type in E2E P2P; do
+	for free_running in 0 1; do
+		master_conf="delay_mechanism $tc_type"
+		slave_conf="delay_mechanism $tc_type"
+		for transparent_nodes in "2" "3 4" "2 3 4 5"; do
+			transparent_conf="clock_type ${tc_type}_TC
+					free_running $free_running
+					delay_mechanism $tc_type"
+			[[ $transparent_nodes =~ "2 3 4 5" ]] &&
+				transparent_conf+="
+					tc_spanning_tree 1"
+			[ $free_running -eq 0 ] &&
+				free_running_nodes="" ||
+				free_running_nodes=$transparent_nodes
+			run_ptp4l || test_fail
+			check_sync || test_fail
+		done
+	done
+done
+
+test_pass
