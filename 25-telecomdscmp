@@ -1,0 +1,42 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with telecom_dscmp and various local priority"
+nodes=2
+
+# Using telecom_dscmp with default local priorities.
+# The first node will become master due to portIdentity.
+master_conf="dataset_comparison	G.8275.x"
+slave_conf="dataset_comparison	G.8275.x"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+# Using telecom_dscmp with clock localPriority set.
+# The first node will now become slave and the second
+# master due to the local priority for the clock.
+master_node=2
+master_conf="dataset_comparison G.8275.x
+G.8275.defaultDS.localPriority 127"
+slave_conf="dataset_comparison	G.8275.x
+G.8275.defaultDS.localPriority 129"
+slave_start=0.0
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+# Using telecom_dscmp with port localPriority set.
+# The first node will become slave and the second
+# master due to the local priority for the port.
+master_node=2
+master_conf="dataset_comparison	G.8275.x
+G.8275.portDS.localPriority	129"
+slave_conf="dataset_comparison	G.8275.x
+G.8275.portDS.localPriority	127"
+slave_start=0.0
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
