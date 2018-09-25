@@ -1,0 +1,24 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with unicast-only messaging"
+
+nodes=3
+master_conf="hybrid_e2e 1
+inhibit_multicast_service 1
+unicast_listen 1"
+slave_conf="
+inhibit_multicast_service 1
+unicast_req_duration 60
+unicast_master_table 1
+
+[unicast_master_table]
+table_id 1
+logQueryInterval 2
+UDPv4 192.168.123.1"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
