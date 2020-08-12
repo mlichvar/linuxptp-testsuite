@@ -210,6 +210,13 @@ check_nsm_output() {
 	[[ "$(cat tmp/log.$nsm_node)" =~ $pattern ]] && test_ok || test_bad
 }
 
+check_last_log_message() {
+	local last_match node=$1 match_pattern=$2 last_pattern=$3
+	last_message=$(grep "$match_pattern" tmp/log.$node | tail -n 1)
+	test_message 2 0 "checking last \"$match_pattern\" in node $node log: "
+	[[ "$last_message" =~ $last_pattern ]] && test_ok || test_bad
+}
+
 print_nondefaults() {
 	local i defopt defoptname optname
 
