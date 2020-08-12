@@ -4,7 +4,7 @@
 
 test_start "ptp4l master selection (clockClass, priority1, priority2)" 
 
-master_node=2
+master_nodes="2"
 
 master_conf="clockClass 6"
 slave_conf=""

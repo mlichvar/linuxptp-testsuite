@@ -5,7 +5,7 @@
 test_start "phc2sys"
 
 nodes=1
-master_node=0
+master_nodes="0"
 run_phc2sys || test_fail
 check_sync || test_fail
 

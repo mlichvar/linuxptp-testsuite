@@ -5,7 +5,7 @@
 test_start "ptp4l with slaveOnly option"
 
 nodes=3
-master_node=2
+master_nodes="2"
 slave_conf="slaveOnly 1"
 
 run_ptp4l || test_fail

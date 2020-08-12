@@ -45,7 +45,7 @@ default_max_sync_time=40
 default_max_ptp4l_delay_limit=1e-4
 default_nodes=3
 default_subnets=""
-default_master_node=1
+default_master_nodes="1"
 default_transparent_nodes=""
 default_free_running_nodes=""
 default_pmc_node=0
@@ -138,7 +138,7 @@ check_sync() {
 	test_message 2 1 "checking clock sync time, max/rms time/freq error:"
 	
 	for i in $(seq 1 $nodes); do
-		[ $i -eq $master_node ] && continue
+		[[ " $master_nodes " =~ [^0-9]$i[^0-9] ]] && continue
 		[ $i -eq $pmc_node ] && continue
 		[ $i -eq $nsm_node ] && continue
 		[[ " $free_running_nodes " =~ [^0-9]$i[^0-9] ]] && continue
@@ -172,7 +172,7 @@ check_ptp4l_delay() {
 	test_message 2 1 "checking max abs path delay measured by ptp4l:"
 
 	for i in $(seq 1 $nodes); do
-		[ $i -eq $master_node ] && continue
+		[[ " $master_nodes " =~ [^0-9]$i[^0-9] ]] && continue
 		[ $i -eq $pmc_node ] && continue
 		[ $i -eq $nsm_node ] && continue
 
@@ -250,7 +250,7 @@ run_ptp4l() {
 
 	[ -z "$subnets" ] && test_subnets=$(seq -s ' ' 1 $nodes) || test_subnets=$subnets
 
-	generate_config4 "$master_node $pmc_node $nsm_node" "$test_subnets" $time_offset \
+	generate_config4 "$master_nodes $pmc_node $nsm_node" "$test_subnets" $time_offset \
 		"$(get_wander_expr)" \
 		"(+ $base_delay (* $jitter (exponential)))"
 
@@ -275,7 +275,7 @@ run_ptp4l() {
 				start=$slave_start
 				conf=$transparent_conf
 				step=$slave_step
-			elif [ $i -eq $master_node ]; then
+			elif [[ " $master_nodes " =~ [^0-9]$i[^0-9] ]]; then
 				start=$master_start
 				conf=$master_conf
 				step=$master_step

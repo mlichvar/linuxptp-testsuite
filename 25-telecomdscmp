@@ -16,7 +16,7 @@ check_sync || test_fail
 # Using telecom_dscmp with clock localPriority set.
 # The first node will now become slave and the second
 # master due to the local priority for the clock.
-master_node=2
+master_nodes="2"
 master_conf="dataset_comparison G.8275.x
 G.8275.defaultDS.localPriority 127"
 slave_conf="dataset_comparison G.8275.x
@@ -29,7 +29,7 @@ check_sync || test_fail
 # Using telecom_dscmp with port localPriority set.
 # The first node will become slave and the second
 # master due to the local priority for the port.
-master_node=2
+master_nodes="2"
 master_conf="dataset_comparison G.8275.x
 G.8275.portDS.localPriority 129"
 slave_conf="dataset_comparison G.8275.x

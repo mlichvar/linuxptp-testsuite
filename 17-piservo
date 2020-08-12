@@ -19,7 +19,7 @@ for jitter in 1e-8 1e-7 1e-6 1e-5; do
 	master_conf=""
 	slave_conf="-P $kp -I $ki"
 	nodes=1
-	master_node=0
+	master_nodes="0"
 	run_phc2sys || test_fail
 	check_sync || test_fail
 
@@ -28,7 +28,7 @@ for jitter in 1e-8 1e-7 1e-6 1e-5; do
 		pi_proportional_const $kp
 		pi_integral_const $ki"
 	nodes=2
-	master_node=1
+	master_nodes="1"
 	run_ptp4l || test_fail
 	check_sync || test_fail
 done
