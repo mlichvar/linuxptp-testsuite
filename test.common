@@ -65,6 +65,8 @@ default_pmc_conf=""
 default_nsm_conf=""
 default_extra_ptp4l_options=""
 
+declare -a extra_node_confs
+
 for defoptname in ${!default_*}; do
 	optname=${defoptname#default_}
 	[ -z "${!optname}" ] && declare "$optname"="${!defoptname}"
@@ -209,13 +211,18 @@ check_nsm_output() {
 }
 
 print_nondefaults() {
-	local defopt defoptname optname
+	local i defopt defoptname optname
 
 	test_message 2 1 "non-default settings:"
 	for defoptname in ${!default_*}; do
 		optname=${defoptname#default_}
 		[ "${!defoptname}" = "${!optname}" ] || \
 			test_message 3 1 $optname=${!optname}
+	done
+
+	for i in $(seq 1 $nodes); do
+		[ -z "${extra_node_confs[$i]}" ] || \
+			test_message 3 1 extra_node_confs[$i]=${extra_node_confs[$i]}
 	done
 }
 
@@ -282,6 +289,8 @@ run_ptp4l() {
 				conf=$slave_conf
 				step=$slave_step
 			fi
+			conf="${conf}
+${extra_node_confs[$i]}"
 			[ -z "$step" ] || echo "node${i}_step = $step" >> tmp/conf
 			echo "node${i}_start = $start" >> tmp/conf
 			start_client $i ptp4l "$conf" "" "$ifaces $extra_ptp4l_options" && \
