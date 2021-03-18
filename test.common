@@ -316,6 +316,8 @@ run_phc2sys() {
 	test_message 1 1 "phc2sys test with $nodes nodes:"
 	print_nondefaults
 
+	rm -f tmp/conf
+
 	for i in $(seq 1 $nodes); do
 		cat >> tmp/conf <<-EOF
 			node${i}_freq = $(get_wander_expr)
