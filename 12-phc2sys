@@ -6,6 +6,13 @@ test_start "phc2sys"
 
 nodes=1
 master_nodes="0"
+
+run_phc2sys || test_fail
+check_sync || test_fail
+
+time_max_limit=1e-8
+slave_conf="-d /dev/pps0"
+
 run_phc2sys || test_fail
 check_sync || test_fail
 
