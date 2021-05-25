@@ -11,6 +11,7 @@ time_max_limit=5e-6
 freq_max_limit=5e-6
 base_delay=$(cat <<-EOF | tr -d '\n'
   (+ $default_base_delay
+    (* subnet 1e-5)
     (* -1 (equal 0.1 subnet 1) (equal 0.1 (min (% (+ time 0) 300) 150) 150))
     (* -1 (equal 0.1 subnet 2) (equal 0.1 (min (% (+ time 100) 300) 150) 150))
     (* -1 (equal 0.1 subnet 3) (equal 0.1 (min (% (+ time 200) 300) 150) 150)))
