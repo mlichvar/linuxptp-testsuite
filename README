@@ -4,8 +4,15 @@ linuxptp-testsuite
 This is a set of tests developed for linuxptp. It uses the clknetsim simulator
 to run the tests quickly and with reproducible results.
 
-Links:
+Links
+-----
 - http://linuxptp.sourceforge.net/
 - https://github.com/mlichvar/clknetsim
 
-Copyright (C) 2013  Miroslav Lichvar <mlichvar@redhat.com>
+Author
+------
+Miroslav Lichvar <mlichvar@redhat.com>
+
+License
+-------
+GPLv2+
