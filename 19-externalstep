@@ -15,11 +15,13 @@ max_sync_time=110
 nodes=6
 
 slave_conf="clock_servo pi
+delay_filter_length 20
 step_threshold 10.0"
 run_ptp4l || test_fail
 check_sync || test_fail
 
 slave_conf="clock_servo linreg
+delay_filter_length 20
 step_threshold 10.0"
 run_ptp4l || test_fail
 check_sync || test_fail
