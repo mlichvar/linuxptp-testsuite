@@ -63,6 +63,7 @@ default_slave_conf=""
 default_transparent_conf=""
 default_pmc_conf=""
 default_nsm_conf=""
+default_pmc_uds=""
 default_extra_ptp4l_options=""
 
 declare -a extra_node_confs
@@ -246,7 +247,7 @@ run_simulation() {
 	test_message 2 0 "running simulation:"
 
 	start_server $nodes \
-		-n $[$(echo "$subnets" | tr -cd '|' | wc -c) + 1] \
+		-n $[$(echo "$subnets" | tr -cd '|' | wc -c) + 2] \
 		-o tmp/log.offset -f tmp/log.freq \
 		$([ $log_packets -ne 0 ] && echo -p tmp/log.packets) \
 		-R $(awk "BEGIN {print $update_interval < 0 ? 2^-($update_interval) : 1}") \
@@ -273,9 +274,14 @@ run_ptp4l() {
 			[ $s -eq $i ] && ifaces="$ifaces -i eth$subnet"
 		done
 
+		export CLKNETSIM_UNIX_SUBNET=$[$subnet + 2]
+
 		test_message 2 0 "starting node $i:"
 		if [ $i -eq $pmc_node ]; then
 			echo "node${i}_start = $pmc_start" >> tmp/conf
+			if [ "$pmc_uds" != "" ]; then
+				ifaces="-u -i /clknetsim/unix/pmc -s /clknetsim/unix/$pmc_uds"
+			fi
 			start_client $i pmc "$pmc_conf" "" "-b 0 $ifaces" && \
 				test_ok || test_error
 		elif [ $i -eq $nsm_node ]; then
@@ -296,8 +302,10 @@ run_ptp4l() {
 				conf=$slave_conf
 				step=$slave_step
 			fi
-			conf="${conf}
-${extra_node_confs[$i]}"
+			conf=$( echo "uds_address /clknetsim/unix/ptp4l"
+				echo "uds_ro_address /clknetsim/unix/ptp4lro"
+				echo "${conf}"
+				echo "${extra_node_confs[$i]}")
 			[ -z "$step" ] || echo "node${i}_step = $step" >> tmp/conf
 			echo "node${i}_start = $start" >> tmp/conf
 			start_client $i ptp4l "$conf" "" "$ifaces $extra_ptp4l_options" && \

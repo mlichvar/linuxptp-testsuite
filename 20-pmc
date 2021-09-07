@@ -110,11 +110,8 @@ requests_replies=(
 		gmPresent                  true
 		gmIdentity                 123456\.fffe\.780101"
 
-# SET is allowed only over UDS
-"GET GRANDMASTER_SETTINGS_NP
-SET GRANDMASTER_SETTINGS_NP clockClass 6 clockAccuracy 0xfd offsetScaledLogVariance 0xfffe currentUtcOffset 36 leap61 1 leap59 0 currentUtcOffsetValid 1 ptpTimescale 0 timeTraceable 1 frequencyTraceable 1 timeSource 0xa1"
+"GET GRANDMASTER_SETTINGS_NP"
 "sending: GET GRANDMASTER_SETTINGS_NP
-sending: SET GRANDMASTER_SETTINGS_NP
 	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT GRANDMASTER_SETTINGS_NP 
 		clockClass              248
 		clockAccuracy           0xfe
@@ -126,8 +123,7 @@ sending: SET GRANDMASTER_SETTINGS_NP
 		ptpTimescale            1
 		timeTraceable           0
 		frequencyTraceable      0
-		timeSource              0xa0
-	123456\.fffe\.780102-2 seq 1 RESPONSE MANAGE?MENT_ERROR_STATUS "
+		timeSource              0xa0"
 
 "GET NULL_MANAGEMENT"
 "sending: GET NULL_MANAGEMENT
@@ -224,22 +220,87 @@ sending: SET GRANDMASTER_SETTINGS_NP
 	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT LOG_MIN_PDELAY_REQ_INTERVAL 
 		logMinPdelayReqInterval 0"
 
-# SET is allowed only over UDS
-"GET PORT_DATA_SET_NP
-SET PORT_DATA_SET_NP neighborPropDelayThresh 20000000 asCapable 1"
+"GET PORT_DATA_SET_NP"
 "sending: GET PORT_DATA_SET_NP
-sending: SET PORT_DATA_SET_NP
 	123456.fffe.780102-1 seq 0 RESPONSE MANAGE?MENT PORT_DATA_SET_NP 
 		neighborPropDelayThresh 20000000
 		asCapable               1
 	123456.fffe.780102-2 seq 0 RESPONSE MANAGE?MENT PORT_DATA_SET_NP 
 		neighborPropDelayThresh 20000000
-		asCapable               1
-	123456.fffe.780102-2 seq 1 RESPONSE MANAGE?MENT_ERROR_STATUS "
+		asCapable               1"
 )
 
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
 	pmc_conf=${requests_replies[$[i * 2]]}
+	run_ptp4l || test_fail
+	if ! check_pmc_output "^${requests_replies[$[i * 2 + 1]]}$"; then
+		cat tmp/log.$pmc_node
+		test_fail
+	fi
+done
+
+requests_replies=(
+"SET PRIORITY1 130"
+"sending: SET PRIORITY1
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT PRIORITY1 
+		priority1 130"
+
+"SET PRIORITY2 130"
+"sending: SET PRIORITY2
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT PRIORITY2 
+		priority2 130"
+
+"SET GRANDMASTER_SETTINGS_NP clockClass 6 clockAccuracy 0xfd offsetScaledLogVariance 0xfffe currentUtcOffset 50 leap61 1 leap59 0 currentUtcOffsetValid 1 ptpTimescale 0 timeTraceable 1 frequencyTraceable 1 timeSource 0xa1"
+"sending: SET GRANDMASTER_SETTINGS_NP
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT GRANDMASTER_SETTINGS_NP 
+		clockClass              6
+		clockAccuracy           0xfd
+		offsetScaledLogVariance 0xfffe
+		currentUtcOffset        50
+		leap61                  1
+		leap59                  0
+		currentUtcOffsetValid   1
+		ptpTimescale            0
+		timeTraceable           1
+		frequencyTraceable      1
+		timeSource              0xa1"
+
+"SET SUBSCRIBE_EVENTS_NP duration 1 NOTIFY_PORT_STATE on NOTIFY_TIME_SYNC on"
+"sending: SET SUBSCRIBE_EVENTS_NP
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT SUBSCRIBE_EVENTS_NP 
+		duration          1
+		NOTIFY_PORT_STATE on
+		NOTIFY_TIME_SYNC  on"
+
+"SET SYNCHRONIZATION_UNCERTAIN_NP 1"
+"sending: SET SYNCHRONIZATION_UNCERTAIN_NP
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT SYNCHRONIZATION_UNCERTAIN_NP 
+		uncertain 1"
+
+# asCapable is ignored
+"SET PORT_DATA_SET_NP neighborPropDelayThresh 1000 asCapable 0"
+"sending: SET PORT_DATA_SET_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET_NP 
+		neighborPropDelayThresh 1000
+		asCapable               1
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET_NP 
+		neighborPropDelayThresh 1000
+		asCapable               1"
+)
+
+for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
+	pmc_conf=${requests_replies[$[i * 2]]}
+
+	# UDS-RO
+	pmc_uds="2:2"
+	run_ptp4l || test_fail
+	if ! check_pmc_output "RESPONSE MANAGEMENT_ERROR_STATUS"; then
+		cat tmp/log.$pmc_node
+		test_fail
+	fi
+
+	# UDS-RW
+	pmc_uds="2:1"
 	run_ptp4l || test_fail
 	if ! check_pmc_output "^${requests_replies[$[i * 2 + 1]]}$"; then
 		cat tmp/log.$pmc_node
