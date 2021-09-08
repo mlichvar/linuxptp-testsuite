@@ -178,11 +178,11 @@ check_ptp4l_delay() {
 		[ $i -eq $pmc_node ] && continue
 		[ $i -eq $nsm_node ] && continue
 
-		max_delay=$(grep -oE 'path delay *[-0-9]+ +[-0-9]+$' tmp/log.$i | awk '
+		max_delay=$(grep -oE 'delay +filtered +[-0-9]+ +raw +[-0-9]+$' tmp/log.$i | awk '
 			BEGIN {
 				max = 0.0
 			} { 
-				abs = $4 < 0 ? -$4 : $4
+				abs = $5 < 0 ? -$5 : $5
 				if (max < abs)
 					max = abs
 			} END {
