@@ -6,40 +6,81 @@ test_start "ptp4l with leap second"
 
 export CLKNETSIM_START_DATE=$(TZ=UTC date -d 'Dec 31 2030 0:00:00' +'%s')
 
-limit=$[30 * 3600]
+limit=$[60 * 3600]
 leap_start=$[24 * 3600]
-min_sync_time=$[$leap_start - 1]
-max_sync_time=$[$leap_start]
 utc_offset=37
-time_rms_limit=1e-4
-time_max_limit=1e-3
+time_max_limit=5e-3
+time_rms_limit=1e-3
+freq_max_limit=5e-6
+freq_rms_limit=2e-6
 
-master_conf="logAnnounceInterval 10
+base_conf="logAnnounceInterval 10
 logSyncInterval 10
 logMinDelayReqInterval 10"
-slave_conf="$master_conf
-time_stamping software
-clock_servo linreg"
 
 pmc_node=3
 pmc_uds="1:1"
 pmc_start=$[12 * 3600]
 
 for leap in "+1" "-1"; do
-	case $leap in
-		+1)
-			leap_conf="leap61 1 leap59 0"
-			;;
-		-1)
-			leap_conf="leap61 0 leap59 1"
-			;;
-	esac
+	for master_ts in "software" "hardware"; do
+		for slave_ts in "software" "hardware"; do
+			master_conf="$base_conf
+			time_stamping $master_ts"
+			slave_conf="$base_conf
+			time_stamping $slave_ts
+			clock_servo linreg"
 
-	master_step="(* $[$utc_offset + $leap] (equal 0.1 (sum 1.0) 1))"
-	pmc_conf="SET GRANDMASTER_SETTINGS_NP clockClass 6 clockAccuracy 0xfe offsetScaledLogVariance 0xffff currentUtcOffset $utc_offset $leap_conf currentUtcOffsetValid 1 ptpTimescale 1 timeTraceable 1 frequencyTraceable 1 timeSource 0xa1"
+			case "$master_ts+$slave_ts" in
+				software+software)
+					min_sync_time=$[$leap_start - 1]
+					max_sync_time=$[$leap_start]
+					step1=$leap
+					step2=$[-$leap]
+					ptp_timescale=0
+					;;
+				software+hardware)
+					min_sync_time=$[$leap_start + 1000]
+					# This should be much smaller, but
+					# there is no reliable way to limit
+					# the number of points of the servo
+					max_sync_time=$[$leap_start + 30000]
+					step1=$leap
+					step2=$[-$leap]
+					ptp_timescale=0
+					;;
+				hardware+software)
+					min_sync_time=$[$leap_start - 1]
+					max_sync_time=$[$leap_start]
+					step1=$[$utc_offset + $leap]
+					step2=0
+					ptp_timescale=1
+					;;
+				hardware+hardware)
+					min_sync_time=12000
+					max_sync_time=30000
+					step1=0
+					step2=0
+					ptp_timescale=1
+					;;
+			esac
 
-	run_ptp4l || test_fail
-	check_sync || test_fail
+			case $leap in
+				+1)
+					leap_conf="leap61 1 leap59 0"
+					;;
+				-1)
+					leap_conf="leap61 0 leap59 1"
+					;;
+			esac
+
+			master_step="(+ (* $step1 (equal 0.1 (sum 1.0) 1)) (* $step2 (equal 0.1 (sum 1.0) 86400)))"
+			pmc_conf="SET GRANDMASTER_SETTINGS_NP clockClass 6 clockAccuracy 0xfe offsetScaledLogVariance 0xffff currentUtcOffset $utc_offset $leap_conf currentUtcOffsetValid 1 ptpTimescale $ptp_timescale timeTraceable 1 frequencyTraceable 1 timeSource 0xa1"
+
+			run_ptp4l || test_fail
+			check_sync || test_fail
+		done
+	done
 done
 
 test_pass
