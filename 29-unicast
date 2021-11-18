@@ -4,6 +4,7 @@
 
 test_start "ptp4l with unicast-only messaging"
 
+# 1 GM, 2 unicast clients
 nodes=3
 master_conf="hybrid_e2e 1
 inhibit_multicast_service 1
@@ -20,5 +21,138 @@ UDPv4 192.168.123.1"
 
 run_ptp4l || test_fail
 check_sync || test_fail
+
+# 2 GMs, 1 unicast client, first one becomes best master because of portIdentity
+nodes=4
+master_nodes="1 2"
+
+max_sync_time=100
+
+master_conf="hybrid_e2e 1
+inhibit_multicast_service 1
+unicast_listen 1"
+slave_conf="
+inhibit_multicast_service 1
+unicast_req_duration 60
+unicast_master_table 1
+slaveOnly 1
+
+[unicast_master_table]
+table_id 1
+logQueryInterval 2
+UDPv4 192.168.123.1
+UDPv4 192.168.123.2"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+
+# 3 GMs, one client. Second node will be selected as best master, then
+# the first node will start and become best master due to portIdentity.
+
+nodes=4
+master_nodes="1 2 3"
+node_start[1]=100
+max_sync_time=200
+master_conf="hybrid_e2e 1
+inhibit_multicast_service 1
+unicast_listen 1"
+slave_conf="
+inhibit_multicast_service 1
+unicast_req_duration 60
+unicast_master_table 1
+slaveOnly 1
+
+[unicast_master_table]
+table_id 1
+logQueryInterval 2
+UDPv4 192.168.123.1
+UDPv4 192.168.123.2
+UDPv4 192.168.123.3"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+check_any_log_message 4 "selected best master clock" "123456\.fffe\.78..02" || test_fail
+check_last_log_message 4 "selected best master clock" "123456\.fffe\.78..01" || test_fail
+
+# First node will be selected as best master, then it will go offline and
+# the second node will become best master due to portIdentity.
+
+node_start[1]=0
+# (* -1 (equal 0.1 from 1) (equal 0.1 (min time 100) 100)) means that
+# negative delay applies when node is 1 and time is over 100s
+base_delay=$(cat <<-EOF | tr -d '\n'
+  (+ $default_base_delay
+    (* -1 (equal 0.1 from 1) (equal 0.1 (min time 100) 100)))
+EOF
+)
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+check_any_log_message 4 "selected best master clock" "123456\.fffe\.78..01" || test_fail
+check_last_log_message 4 "selected best master clock" "123456\.fffe\.78..02" || test_fail
+
+# First node will be selected as best master, then it will stop and
+# the second node will become best master due to portIdentity.
+# Finally, second node will also leave, and third one becomes only master.
+
+# (* -1 (equal 0.1 from 1) (equal 0.1 (min time 100) 100)) means that
+# negative delay applies when node is 1 and time is over 100s
+# (* -1 (equal 0.1 from 2) (equal 0.1 (min time 150) 150)) means that 
+# negative delay applies when node is 2 and time is over 150s
+base_delay=$(cat <<-EOF | tr -d '\n'
+  (+ $default_base_delay
+    (* -1 (equal 0.1 from 1) (equal 0.1 (min time 100) 100))
+    (* -1 (equal 0.1 from 2) (equal 0.1 (min time 150) 150)))
+EOF
+)
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+check_any_log_message 4 "selected best master clock" "123456\.fffe\.78..01" || test_fail
+check_any_log_message 4 "selected best master clock" "123456\.fffe\.78..02" || test_fail
+check_last_log_message 4 "selected best master clock" "123456\.fffe\.78..03" || test_fail
+
+
+# First node will be selected as best master, then it will stop and
+# the second node will become best master due to portIdentity,
+# then first one comes back and becomes master again.
+
+# we lower the expectations because of all the constant switchovers
+time_max_limit=1e-5
+time_rms_limit=1e-5
+freq_max_limit=1e-5
+freq_rms_limit=1e-5
+
+# we have negative delay (node being offline)
+# if the packet is sent from node 1,
+# and time is in the intervals of (150, 200] and (350, 400] seconds.
+# Delay of $default_base_delay applies otherwise.
+# Which translates to the node 1 appearing offline twice,
+# and still being re-selected as best master in the end.
+
+# (equal 0.1 from 1) selects 1st node.
+# (% time 200) splits our 500s run time into 200s, 200s, 100s chunks.
+# (min (% time 200) 150) selects min between 150 and time % 200,
+# splitting each 200s chunk into intervals <=150s and >150s.
+#
+# (equal 0.1 (min (% time 200) 150) 150) checks if the chunked time is >150s
+base_delay=$(cat <<-EOF | tr -d '\n'
+  (+ $default_base_delay
+    (* -1
+      (equal 0.1 from 1)
+      (equal 0.1
+        (min (% time 200) 150) 150)))
+EOF
+)
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+check_any_log_message 4 "selected best master clock" "123456\.fffe\.78..02" || test_fail
+check_last_log_message 4 "selected best master clock" "123456\.fffe\.78..01" || test_fail
 
 test_pass

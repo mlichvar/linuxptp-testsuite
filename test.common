@@ -67,6 +67,7 @@ default_pmc_uds=""
 default_extra_ptp4l_options=""
 
 declare -a extra_node_confs
+declare -a node_start
 
 for defoptname in ${!default_*}; do
 	optname=${defoptname#default_}
@@ -211,8 +212,15 @@ check_nsm_output() {
 	[[ "$(cat tmp/log.$nsm_node)" =~ $pattern ]] && test_ok || test_bad
 }
 
+check_any_log_message() {
+	local matching_messages node=$1 match_pattern=$2 last_pattern=$3
+	matching_messages=$(grep "$match_pattern" tmp/log.$node)
+	test_message 2 0 "checking any \"$match_pattern\" in node $node log: "
+	[[ "$matching_messages" =~ $last_pattern ]] && test_ok || test_bad
+}
+
 check_last_log_message() {
-	local last_match node=$1 match_pattern=$2 last_pattern=$3
+	local last_message node=$1 match_pattern=$2 last_pattern=$3
 	last_message=$(grep "$match_pattern" tmp/log.$node | tail -n 1)
 	test_message 2 0 "checking last \"$match_pattern\" in node $node log: "
 	[[ "$last_message" =~ $last_pattern ]] && test_ok || test_bad
@@ -307,6 +315,11 @@ run_ptp4l() {
 				echo "${conf}"
 				echo "${extra_node_confs[$i]}")
 			[ -z "$step" ] || echo "node${i}_step = $step" >> tmp/conf
+
+			# override individual node start time if set
+			if [[ -n "${node_start[$i]}" ]]; then
+				start=${node_start[$i]}
+			fi
 			echo "node${i}_start = $start" >> tmp/conf
 			start_client $i ptp4l "$conf" "" "$ifaces $extra_ptp4l_options" && \
 				test_ok || test_error
