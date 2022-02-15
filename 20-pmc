@@ -228,6 +228,80 @@ requests_replies=(
 	123456.fffe.780102-2 seq 0 RESPONSE MANAGE?MENT PORT_DATA_SET_NP 
 		neighborPropDelayThresh 20000000
 		asCapable               1"
+
+"GET PORT_STATS_NP"
+"sending: GET PORT_STATS_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_STATS_NP 
+		portIdentity              123456\.fffe\.780102-1
+		rx_Sync                   [1234][0-9]
+		rx_Delay_Req              0
+		rx_Pdelay_Req             0
+		rx_Pdelay_Resp            0
+		rx_Follow_Up              [1234][0-9]
+		rx_Delay_Resp             [1234][0-9]
+		rx_Pdelay_Resp_Follow_Up  0
+		rx_Announce               [1234][0-9]
+		rx_Signaling              0
+		rx_Management             0
+		tx_Sync                   0
+		tx_Delay_Req              [1234][0-9]
+		tx_Pdelay_Req             0
+		tx_Pdelay_Resp            0
+		tx_Follow_Up              0
+		tx_Delay_Resp             0
+		tx_Pdelay_Resp_Follow_Up  0
+		tx_Announce               0
+		tx_Signaling              0
+		tx_Management             0
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_STATS_NP 
+		portIdentity              123456\.fffe\.780102-2
+		rx_Sync                   0
+		rx_Delay_Req              0
+		rx_Pdelay_Req             0
+		rx_Pdelay_Resp            0
+		rx_Follow_Up              0
+		rx_Delay_Resp             0
+		rx_Pdelay_Resp_Follow_Up  0
+		rx_Announce               0
+		rx_Signaling              0
+		rx_Management             1
+		tx_Sync                   [1234][0-9]
+		tx_Delay_Req              0
+		tx_Pdelay_Req             0
+		tx_Pdelay_Resp            0
+		tx_Follow_Up              [1234][0-9]
+		tx_Delay_Resp             0
+		tx_Pdelay_Resp_Follow_Up  0
+		tx_Announce               [1234][0-9]
+		tx_Signaling              0
+		tx_Management             1"
+
+"GET PORT_SERVICE_STATS_NP"
+"sending: GET PORT_SERVICE_STATS_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_SERVICE_STATS_NP 
+		portIdentity              123456\.fffe\.780102-1
+		announce_timeout          0
+		sync_timeout              0
+		delay_timeout             [1234][0-9]
+		unicast_service_timeout   0
+		unicast_request_timeout   0
+		master_announce_timeout   0
+		master_sync_timeout       0
+		qualification_timeout     0
+		sync_mismatch             0
+		followup_mismatch         0
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_SERVICE_STATS_NP 
+		portIdentity              123456\.fffe\.780102-2
+		announce_timeout          1
+		sync_timeout              0
+		delay_timeout             0
+		unicast_service_timeout   0
+		unicast_request_timeout   0
+		master_announce_timeout   [1234][0-9]
+		master_sync_timeout       [1234][0-9]
+		qualification_timeout     0
+		sync_mismatch             0
+		followup_mismatch         0"
 )
 
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
@@ -286,6 +360,30 @@ requests_replies=(
 	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET_NP 
 		neighborPropDelayThresh 1000
 		asCapable               1"
+
+"GET PORT_PROPERTIES_NP"
+"sending: GET PORT_PROPERTIES_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_PROPERTIES_NP 
+		portIdentity            123456\.fffe\.780102-1
+		portState               SLAVE
+		timestamping            HARDWARE
+		interface               eth0
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_PROPERTIES_NP 
+		portIdentity            123456\.fffe\.780102-2
+		portState               MASTER
+		timestamping            HARDWARE
+		interface               eth1"
+
+"GET PORT_HWCLOCK_NP"
+"sending: GET PORT_HWCLOCK_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_HWCLOCK_NP 
+		portIdentity            123456\.fffe\.780102-1
+		phcIndex                1
+		flags                   0
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_HWCLOCK_NP 
+		portIdentity            123456\.fffe\.780102-2
+		phcIndex                1
+		flags                   0"
 )
 
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
