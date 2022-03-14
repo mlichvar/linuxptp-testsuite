@@ -10,7 +10,7 @@ max_sync_time=2000
 
 while read jitter time_max_limit freq_max_limit time_rms_limit freq_rms_limit; do
 	master_conf=""
-	slave_conf="-E linreg"
+	slave_conf="-s /dev/ptp0 -O 0 -E linreg"
 	nodes=1
 	master_nodes="0"
 	run_phc2sys || test_fail

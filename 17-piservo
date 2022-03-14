@@ -17,7 +17,7 @@ for jitter in 1e-8 1e-7 1e-6 1e-5; do
 	freq_max_limit=$(awk 'BEGIN {print 8 * '$freq_rms_limit'}')
 
 	master_conf=""
-	slave_conf="-P $kp -I $ki"
+	slave_conf="-s /dev/ptp0 -O 0 -P $kp -I $ki"
 	nodes=1
 	master_nodes="0"
 	run_phc2sys || test_fail
