@@ -16,19 +16,24 @@ for jitter in 1e-8 1e-7 1e-6 1e-5; do
 	time_max_limit=$(awk 'BEGIN {print 8 * '$time_rms_limit'}')
 	freq_max_limit=$(awk 'BEGIN {print 8 * '$freq_rms_limit'}')
 
+	refclock_jitter=$jitter
 	master_conf=""
-	slave_conf="-s /dev/ptp0 -O 0 -P $kp -I $ki"
+	slave_conf=""
+	phc2sys_conf="-s /dev/ptp0 -O 0 -P $kp -I $ki"
 	nodes=1
 	master_nodes="0"
-	run_phc2sys || test_fail
+	phc2sys_node=1
+	run_test || test_fail
 	check_sync || test_fail
 
 	master_conf="delay_mechanism P2P"
 	slave_conf="delay_mechanism P2P
 		pi_proportional_const $kp
 		pi_integral_const $ki"
+	phc2sys_conf=""
 	nodes=2
 	master_nodes="1"
+	phc2sys_node=0
 	run_ptp4l || test_fail
 	check_sync || test_fail
 done

@@ -35,6 +35,8 @@ default_time_offset=1e-1
 default_freq_offset=1e-4
 default_base_delay=1e-7
 default_jitter=1e-7
+default_refclock_jitter=1e-7
+default_refclock_offset=0.0
 default_wander=1e-9
 default_time_rms_limit=1e-6
 default_freq_rms_limit=1e-6
@@ -48,10 +50,12 @@ default_subnets=""
 default_master_nodes="1"
 default_transparent_nodes=""
 default_free_running_nodes=""
+default_phc2sys_node=0
 default_pmc_node=0
 default_nsm_node=0
 default_master_start=0.0
 default_slave_start=9.0
+default_phc2sys_start=9.0
 default_pmc_start=50.0
 default_nsm_start=50.0
 default_master_step=""
@@ -61,8 +65,10 @@ default_log_packets=0
 default_master_conf=""
 default_slave_conf=""
 default_transparent_conf=""
+default_phc2sys_conf=""
 default_pmc_conf=""
 default_nsm_conf=""
+default_phc2sys_uds=""
 default_pmc_uds=""
 default_extra_ptp4l_options=""
 
@@ -263,10 +269,10 @@ run_simulation() {
 		-l $(awk "BEGIN {print $limit * 2^$update_interval}") && test_ok || test_error
 }
 
-run_ptp4l() {
+run_test() {
 	local i s subnet ifaces test_subnets conf start
 
-	test_message 1 1 "ptp4l test with $nodes nodes:"
+	test_message 1 1 "network with $nodes nodes:"
 	print_nondefaults
 
 	[ -z "$subnets" ] && test_subnets=$(seq -s ' ' 1 $nodes) || test_subnets=$subnets
@@ -285,7 +291,18 @@ run_ptp4l() {
 		export CLKNETSIM_UNIX_SUBNET=$[$subnet + 2]
 
 		test_message 2 0 "starting node $i:"
-		if [ $i -eq $pmc_node ]; then
+		if [ $i -eq $phc2sys_node ]; then
+			echo "node${i}_start = $phc2sys_start" >> tmp/conf
+			echo "node${i}_refclock = (+ $refclock_offset (* $refclock_jitter (normal)))" \
+				>> tmp/conf
+			if [ "$phc2sys_uds" != "" ]; then
+				ifaces="-z /clknetsim/unix/$phc2sys_uds"
+			else
+				ifaces=""
+			fi
+			start_client $i phc2sys "$ifaces $phc2sys_conf" && \
+				test_ok || test_error
+		elif [ $i -eq $pmc_node ]; then
 			echo "node${i}_start = $pmc_start" >> tmp/conf
 			if [ "$pmc_uds" != "" ]; then
 				ifaces="-u -i /clknetsim/unix/pmc -s /clknetsim/unix/$pmc_uds"
@@ -331,26 +348,6 @@ run_ptp4l() {
 	run_simulation
 }
 
-run_phc2sys() {
-	local i
-
-	test_message 1 1 "phc2sys test with $nodes nodes:"
-	print_nondefaults
-
-	rm -f tmp/conf
-
-	for i in $(seq 1 $nodes); do
-		cat >> tmp/conf <<-EOF
-			node${i}_freq = $(get_wander_expr)
-			node${i}_refclock = (* $jitter (normal))
-			node${i}_offset = $time_offset
-			node${i}_start = $slave_start
-		EOF
-
-		test_message 2 0 "starting node $i:"
-		start_client $i phc2sys "$slave_conf" && test_ok || test_error
-		[ $? -ne 0 ] && return 1
-	done
-	
-	run_simulation
+run_ptp4l() {
+	run_test "$@"
 }

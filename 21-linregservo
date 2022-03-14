@@ -9,18 +9,23 @@ limit=4000
 max_sync_time=2000
 
 while read jitter time_max_limit freq_max_limit time_rms_limit freq_rms_limit; do
+	refclock_jitter=$jitter
 	master_conf=""
-	slave_conf="-s /dev/ptp0 -O 0 -E linreg"
+	slave_conf=""
+	phc2sys_conf="-s /dev/ptp0 -O 0 -E linreg"
 	nodes=1
 	master_nodes="0"
-	run_phc2sys || test_fail
+	phc2sys_node=1
+	run_test || test_fail
 	check_sync || test_fail
 
 	master_conf="delay_mechanism P2P"
 	slave_conf="delay_mechanism P2P
 		clock_servo linreg"
+	phc2sys_conf=""
 	nodes=2
 	master_nodes="1"
+	phc2sys_node=0
 	run_ptp4l || test_fail
 	check_sync || test_fail
 done <<-EOF
