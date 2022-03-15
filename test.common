@@ -70,6 +70,8 @@ default_pmc_conf=""
 default_nsm_conf=""
 default_phc2sys_uds=""
 default_pmc_uds=""
+default_phc2sys_phc_base=0
+default_phc2sys_phc_swap=0
 default_extra_ptp4l_options=""
 
 declare -a extra_node_confs
@@ -295,13 +297,17 @@ run_test() {
 			echo "node${i}_start = $phc2sys_start" >> tmp/conf
 			echo "node${i}_refclock = (+ $refclock_offset (* $refclock_jitter (normal)))" \
 				>> tmp/conf
+			if [ "$phc2sys_phc_base" -gt 0 ]; then
+				echo "node${i}_refclock_base = node${phc2sys_phc_base}" >> tmp/conf
+			fi
 			if [ "$phc2sys_uds" != "" ]; then
 				ifaces="-z /clknetsim/unix/$phc2sys_uds"
 			else
 				ifaces=""
 			fi
-			start_client $i phc2sys "$ifaces $phc2sys_conf" && \
-				test_ok || test_error
+			CLKNETSIM_PHC_SWAP=$phc2sys_phc_swap \
+				start_client $i phc2sys "$ifaces $phc2sys_conf" && \
+					test_ok || test_error
 		elif [ $i -eq $pmc_node ]; then
 			echo "node${i}_start = $pmc_start" >> tmp/conf
 			if [ "$pmc_uds" != "" ]; then

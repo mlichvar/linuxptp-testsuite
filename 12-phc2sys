@@ -13,7 +13,40 @@ run_test || test_fail
 check_sync || test_fail
 
 time_max_limit=1e-8
+phc2sys_conf="-O 0 -d /dev/pps0"
+
+run_test || test_fail
+check_sync || test_fail
+
 phc2sys_conf="-O 0 -s /dev/ptp0 -d /dev/pps0"
+
+run_test || test_fail
+check_sync || test_fail
+
+nodes=3
+subnets="1 2 3 | 1 2 3"
+master_nodes="1"
+master_conf="utc_offset 30"
+refclock_offset="-30"
+phc2sys_node=3
+phc2sys_uds="2:1"
+phc2sys_conf="-a -r"
+phc2sys_phc_base=2
+phc2sys_phc_swap=1
+time_max_limit=$default_time_max_limit
+# network down at 150-250 in subnet 1 and 100-200 in subnet 2
+base_delay=$(cat <<-EOF | tr -d '\n'
+  (+ $default_base_delay
+    (* -1
+      (equal 0.6 subnet 1.5)
+      (equal 0.1 (min (+ time (* subnet 50) -100) 100) 100)
+      (equal 0.1 (max (+ time (* subnet 50) -100) 200) 200)))
+EOF
+)
+# step at 170th second
+slave_step="(* $time_offset (equal 0.1 (sum 1.0) 170))"
+min_sync_time=215
+max_sync_time=240
 
 run_test || test_fail
 check_sync || test_fail
