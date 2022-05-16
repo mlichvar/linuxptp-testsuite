@@ -304,10 +304,10 @@ requests_replies=(
 		followup_mismatch         0"
 "GET UNICAST_MASTER_TABLE_NP"
 "sending: GET UNICAST_MASTER_TABLE_NP
-	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT MID_UNICAST_MASTER_TABLE_NP 
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT UNICAST_MASTER_TABLE_NP 
 		actual_table_size 0
 		BM  identity                 address                            state     clockClass clockQuality offsetScaledLogVariance p1  p2
-	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT MID_UNICAST_MASTER_TABLE_NP 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT UNICAST_MASTER_TABLE_NP 
 		actual_table_size 0
 		BM  identity                 address                            state     clockClass clockQuality offsetScaledLogVariance p1  p2"
 )
