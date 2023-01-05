@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with clock_class_threshold option"
+
+master_conf="clockClass 6"
+slave_conf="clock_class_threshold 7"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+master_conf="clockClass 7"
+slave_conf="clock_class_threshold 7"
+run_ptp4l || test_fail
+check_sync || test_fail
+
+master_conf="clockClass 140"
+slave_conf="clock_class_threshold 7"
+run_ptp4l || test_fail
+check_sync && test_fail
+
+test_pass
