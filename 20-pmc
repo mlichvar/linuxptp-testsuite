@@ -310,6 +310,41 @@ requests_replies=(
 	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT UNICAST_MASTER_TABLE_NP 
 		actual_table_size 0
 		BM  identity                 address                            state     clockClass clockQuality offsetScaledLogVariance p1  p2"
+
+"GET ALTERNATE_TIME_OFFSET_ENABLE"
+"sending: GET ALTERNATE_TIME_OFFSET_ENABLE
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT ALTERNATE_TIME_OFFSET_ENABLE 
+		keyField       0
+		enable         0"
+
+"GET ALTERNATE_TIME_OFFSET_NAME"
+"sending: GET ALTERNATE_TIME_OFFSET_NAME
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT ALTERNATE_TIME_OFFSET_NAME 
+		keyField       0
+		displayName    "
+
+"GET ALTERNATE_TIME_OFFSET_PROPERTIES"
+"sending: GET ALTERNATE_TIME_OFFSET_PROPERTIES
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT ALTERNATE_TIME_OFFSET_PROPERTIES 
+		keyField       0
+		currentOffset  0
+		jumpSeconds    0
+		timeOfNextJump 0"
+
+"GET POWER_PROFILE_SETTINGS_NP"
+"sending: GET POWER_PROFILE_SETTINGS_NP
+	123456.fffe.780102-1 seq 0 RESPONSE MANAGEMENT POWER_PROFILE_SETTINGS_NP 
+		version                   0
+		grandmasterID             0x0000
+		grandmasterTimeInaccuracy 4294967295
+		networkTimeInaccuracy     0
+		totalTimeInaccuracy       4294967295
+	123456.fffe.780102-2 seq 0 RESPONSE MANAGEMENT POWER_PROFILE_SETTINGS_NP 
+		version                   0
+		grandmasterID             0x0000
+		grandmasterTimeInaccuracy 4294967295
+		networkTimeInaccuracy     0
+		totalTimeInaccuracy       4294967295"
 )
 
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
@@ -368,6 +403,41 @@ requests_replies=(
 	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_DATA_SET_NP 
 		neighborPropDelayThresh 1000
 		asCapable               1"
+
+"SET ALTERNATE_TIME_OFFSET_ENABLE keyField 3 enable 1"
+"sending: SET ALTERNATE_TIME_OFFSET_ENABLE
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT ALTERNATE_TIME_OFFSET_ENABLE 
+		keyField       3
+		enable         1"
+
+"SET ALTERNATE_TIME_OFFSET_NAME keyField 3 displayName CET"
+"sending: SET ALTERNATE_TIME_OFFSET_NAME
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT ALTERNATE_TIME_OFFSET_NAME 
+		keyField       3
+		displayName    CET"
+
+"SET ALTERNATE_TIME_OFFSET_PROPERTIES keyField 3 currentOffset 36000 jumpSeconds -3600 timeOfNextJump 6000000000"
+"sending: SET ALTERNATE_TIME_OFFSET_PROPERTIES
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT ALTERNATE_TIME_OFFSET_PROPERTIES 
+		keyField       3
+		currentOffset  36000
+		jumpSeconds    -3600
+		timeOfNextJump 6000000000"
+
+"SET POWER_PROFILE_SETTINGS_NP version 2 grandmasterID 1 grandmasterTimeInaccuracy 100 networkTimeInaccuracy 100 totalTimeInaccuracy 200"
+"sending: SET POWER_PROFILE_SETTINGS_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT POWER_PROFILE_SETTINGS_NP 
+		version                   2
+		grandmasterID             0x0001
+		grandmasterTimeInaccuracy 100
+		networkTimeInaccuracy     100
+		totalTimeInaccuracy       200
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT POWER_PROFILE_SETTINGS_NP 
+		version                   2
+		grandmasterID             0x0001
+		grandmasterTimeInaccuracy 100
+		networkTimeInaccuracy     100
+		totalTimeInaccuracy       200"
 
 "GET PORT_PROPERTIES_NP"
 "sending: GET PORT_PROPERTIES_NP
