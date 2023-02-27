@@ -1,0 +1,24 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with power profile"
+
+nodes=3
+pmc_node=3
+
+master_conf="power_profile.version 2017"
+pmc_conf="SET ALTERNATE_TIME_OFFSET_ENABLE keyField 2 enable 1
+SET ALTERNATE_TIME_OFFSET_NAME keyField 2 displayName CET
+SET ALTERNATE_TIME_OFFSET_PROPERTIES keyField 2 currentOffset 36000 jumpSeconds -3600 timeOfNextJump 6000000000"
+pmc_uds="1:1"
+log_packets=1
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_message 2 0 "checking length of announce message:"
+grep '	1	2	.*	320	' tmp/log.packets | \
+	awk '{ print $8 }' | grep -q 110 && test_ok || { test_bad; test_fail; }
+
+test_pass
