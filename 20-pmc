@@ -337,13 +337,13 @@ requests_replies=(
 		version                   0
 		grandmasterID             0x0000
 		grandmasterTimeInaccuracy 4294967295
-		networkTimeInaccuracy     0
+		networkTimeInaccuracy     4294967295
 		totalTimeInaccuracy       4294967295
 	123456.fffe.780102-2 seq 0 RESPONSE MANAGEMENT POWER_PROFILE_SETTINGS_NP 
 		version                   0
 		grandmasterID             0x0000
 		grandmasterTimeInaccuracy 4294967295
-		networkTimeInaccuracy     0
+		networkTimeInaccuracy     4294967295
 		totalTimeInaccuracy       4294967295"
 )
 
