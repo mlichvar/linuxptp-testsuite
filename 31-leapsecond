@@ -2,7 +2,7 @@
 
 . test.common
 
-test_start "ptp4l with leap second"
+test_start "ptp4l and phc2sys with leap second"
 
 export CLKNETSIM_START_DATE=$(TZ=UTC date -d 'Dec 31 2030 0:00:00' +'%s')
 
@@ -22,6 +22,12 @@ pmc_node=3
 pmc_uds="1:1"
 pmc_start=$[12 * 3600]
 
+phc2sys_node=4
+phc2sys_uds="2:1"
+phc2sys_conf="-a -r -R 0.01 -E linreg"
+phc2sys_phc_base=2
+phc2sys_phc_swap=1
+
 for leap in "+1" "-1"; do
 	for master_ts in "software" "hardware"; do
 		for slave_ts in "software" "hardware"; do
@@ -33,13 +39,16 @@ for leap in "+1" "-1"; do
 
 			case "$master_ts+$slave_ts" in
 				software+software)
+					nodes=3
 					min_sync_time=$[$leap_start - 1]
 					max_sync_time=$[$leap_start]
 					step1=$leap
 					step2=$[-$leap]
 					ptp_timescale=0
+					refclock_offset=0.0
 					;;
 				software+hardware)
+					nodes=4
 					min_sync_time=$[$leap_start + 1000]
 					# This should be much smaller, but
 					# there is no reliable way to limit
@@ -48,20 +57,25 @@ for leap in "+1" "-1"; do
 					step1=$leap
 					step2=$[-$leap]
 					ptp_timescale=0
+					refclock_offset=0.0
 					;;
 				hardware+software)
+					nodes=3
 					min_sync_time=$[$leap_start - 1]
 					max_sync_time=$[$leap_start]
 					step1=$[$utc_offset + $leap]
 					step2=0
 					ptp_timescale=1
+					refclock_offset=0.0
 					;;
 				hardware+hardware)
-					min_sync_time=12000
-					max_sync_time=30000
+					nodes=4
+					min_sync_time=11000
+					max_sync_time=$[$leap_start]
 					step1=0
 					step2=0
 					ptp_timescale=1
+					refclock_offset=$[-($utc_offset + $leap)]
 					;;
 			esac
 
