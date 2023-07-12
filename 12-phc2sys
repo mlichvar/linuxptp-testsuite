@@ -30,10 +30,16 @@ master_conf="utc_offset 30"
 refclock_offset="-30"
 phc2sys_node=3
 phc2sys_uds="2:1"
-phc2sys_conf="-a -r"
 phc2sys_phc_base=2
 phc2sys_phc_swap=1
 time_max_limit=$default_time_max_limit
+
+phc2sys_conf="-w -s eth0"
+
+run_test || test_fail
+check_sync || test_fail
+
+phc2sys_conf="-a -r"
 # network down at 150-250 in subnet 1 and 100-200 in subnet 2
 base_delay=$(cat <<-EOF | tr -d '\n'
   (+ $default_base_delay
