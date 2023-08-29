@@ -300,11 +300,10 @@ run_test() {
 			if [ "$phc2sys_phc_base" -gt 0 ]; then
 				echo "node${i}_refclock_base = node${phc2sys_phc_base}" >> tmp/conf
 			fi
-			if [ "$phc2sys_uds" != "" ]; then
-				ifaces="-z /clknetsim/unix/$phc2sys_uds"
-			else
-				ifaces=""
-			fi
+			ifaces=""
+			for uds in $phc2sys_uds; do
+				ifaces="$ifaces -z /clknetsim/unix/$uds"
+			done
 			CLKNETSIM_PHC_SWAP=$phc2sys_phc_swap \
 				start_client $i phc2sys "$ifaces $phc2sys_conf" && \
 					test_ok || test_error
