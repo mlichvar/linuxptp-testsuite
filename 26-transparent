@@ -10,11 +10,17 @@ test_start "ptp4l with transparent clocks"
 subnets="1 2 | 2 3 | 2 4 | 3 5 | 4 5 | 5 6"
 nodes=6
 max_sync_time=100
-time_max_limit=5e-6
-freq_max_limit=5e-6
-master_conf="clockClass 6"
 
 for tc_type in E2E P2P; do
+	if [ "$tc_type" == "E2E" ]; then
+		time_max_limit=3e-8
+		freq_max_limit=2e-8
+		delay_correction="(+ delay (* 8e-11 (+ length 42)))"
+	else
+		time_max_limit=5e-6
+		freq_max_limit=5e-6
+		delay_correction=""
+	fi
 	for free_running in 0 1; do
 		master_conf="delay_mechanism $tc_type"
 		slave_conf="delay_mechanism $tc_type"

@@ -50,6 +50,7 @@ default_subnets=""
 default_master_nodes="1"
 default_transparent_nodes=""
 default_free_running_nodes=""
+default_delay_correction=""
 default_phc2sys_node=0
 default_pmc_node=0
 default_nsm_node=0
@@ -272,7 +273,7 @@ run_simulation() {
 }
 
 run_test() {
-	local i s subnet ifaces test_subnets conf start
+	local i j s subnet ifaces test_subnets conf start
 
 	test_message 1 1 "network with $nodes nodes:"
 	print_nondefaults
@@ -282,6 +283,14 @@ run_test() {
 	generate_config4 "$master_nodes $pmc_node $nsm_node" "$test_subnets" $time_offset \
 		"$(get_wander_expr)" \
 		"(+ $base_delay (* $jitter (exponential)))"
+
+	if [ -n "$delay_correction" ]; then
+		for i in $(seq 1 $nodes); do
+			for j in $(seq 1 $nodes); do
+				echo "node${i}_delay_correction${j} = $delay_correction" >> tmp/conf
+			done
+		done
+	fi
 
 	for i in $(seq 1 $nodes); do
 		ifaces="" subnet=0
