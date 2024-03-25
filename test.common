@@ -63,6 +63,7 @@ default_master_step=""
 default_slave_step=""
 default_update_interval=0
 default_log_packets=0
+default_pcap_dumps=0
 default_master_conf=""
 default_slave_conf=""
 default_transparent_conf=""
@@ -300,6 +301,7 @@ run_test() {
 		done
 
 		export CLKNETSIM_UNIX_SUBNET=$[$subnet + 2]
+		[ $pcap_dumps -ne 0 ] && export CLKNETSIM_PCAP_DUMP=tmp/pcap.$i
 
 		test_message 2 0 "starting node $i:"
 		if [ $i -eq $phc2sys_node ]; then
