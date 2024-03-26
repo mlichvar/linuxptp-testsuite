@@ -1,0 +1,21 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with Common Mean Link Delay Service"
+
+nodes=3
+master_conf="delay_mechanism P2P"
+extra_node_confs[2]="delay_mechanism COMMON_P2P
+cmlds.server_address /clknetsim/unix/3:1"
+extra_node_confs[3]="clientOnly 1
+clockIdentity C37D50.0000.000000
+transportSpecific 2
+[eth0]
+transportSpecific 0
+delay_mechanism P2P"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
