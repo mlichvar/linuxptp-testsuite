@@ -1,0 +1,83 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with authentication"
+
+if ! pmc --spp 1 --sa_file /dev/null -i lo |& grep -q 'sad is empty'; then
+	echo "Missing authentication support"
+	exit 0
+fi
+
+cat > tmp/sa1.conf <<-EOF
+[security_association]
+spp 10
+1 AES128 HEX:FAF48EBA01E7C5966A76CB787AED4E7B
+2 AES256 B64:PKTF9VQz94qPaoAzW4eE3JtFoQ8Ov1OTQSojalWyMbs=
+3 SHA256-128 HEX:EE91D469B3A8ADC6AC8EB28E21794C706E08FDE48863828A7B0281AFCA81B17D
+4 SHA256 26 abcdefghijklmnopqrstuvwxyz
+EOF
+
+cat > tmp/sa2.conf <<-EOF
+[security_association]
+spp 10
+1 AES128 HEX:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+2 AES256 B64:PKTF9VQz94qPaoAzW4eE3JtFoQ8Ov1OTQSojalWyMbs=
+3 SHA256-128 HEX:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+4 SHA256 32 HEX:CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+EOF
+
+nodes=4
+pmc_node=4
+transparent_nodes="2"
+subnets="1 2 | 2 3 4 | 1 3 | 1 3 | 1 3"
+# don't break order of messages received by pmc
+jitter="(* $default_jitter (equal 5.1 subnet 0))"
+
+master_conf="spp 10
+sa_file tmp/sa1.conf
+active_key_id 1
+[eth2]
+active_key_id 2
+[eth3]
+active_key_id 3
+[eth4]
+active_key_id 4"
+slave_conf="$master_conf"
+transparent_conf="spp 10
+sa_file tmp/sa1.conf
+active_key_id 1
+clock_type E2E_TC"
+pmc_conf="GET PORT_DATA_SET"
+pmc_uds="3:1"
+extra_pmc_options="--spp 10 --sa_file tmp/sa1.conf --active_key_id 1"
+log_packets=1
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+check_pmc_output ".*portState               SLAVE
+.*portState               PASSIVE
+.*portState               PASSIVE
+.*portState               PASSIVE" || test_fail
+
+slave_conf="spp 10
+sa_file tmp/sa2.conf
+active_key_id 2
+[eth2]
+active_key_id 3
+[eth3]
+active_key_id 4
+[eth4]
+active_key_id 1"
+extra_pmc_options="--spp 10 --sa_file tmp/sa2.conf --active_key_id 2"
+
+run_ptp4l || test_fail
+check_sync && test_fail
+
+check_pmc_output ".*portState               MASTER
+.*portState               UNCALIBRATED
+.*portState               MASTER
+.*portState               MASTER" || test_fail
+
+test_pass

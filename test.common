@@ -75,6 +75,7 @@ default_pmc_uds=""
 default_phc2sys_phc_base=0
 default_phc2sys_phc_swap=0
 default_extra_ptp4l_options=""
+default_extra_pmc_options=""
 
 declare -a extra_node_confs
 declare -a node_start
@@ -323,7 +324,7 @@ run_test() {
 			if [ "$pmc_uds" != "" ]; then
 				ifaces="-u -i /clknetsim/unix/pmc -s /clknetsim/unix/$pmc_uds"
 			fi
-			start_client $i pmc "$pmc_conf" "" "-b 0 $ifaces" && \
+			start_client $i pmc "$pmc_conf" "" "-b 0 $ifaces $extra_pmc_options" && \
 				test_ok || test_error
 		elif [ $i -eq $nsm_node ]; then
 			echo "node${i}_start = $nsm_start" >> tmp/conf
