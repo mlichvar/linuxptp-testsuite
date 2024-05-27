@@ -79,6 +79,7 @@ default_extra_pmc_options=""
 
 declare -a extra_node_confs
 declare -a node_start
+declare -a ptp4l_suffixes
 
 for defoptname in ${!default_*}; do
 	optname=${defoptname#default_}
@@ -355,8 +356,8 @@ run_test() {
 				start=${node_start[$i]}
 			fi
 			echo "node${i}_start = $start" >> tmp/conf
-			start_client $i ptp4l "$conf" "" "$ifaces $extra_ptp4l_options" && \
-				test_ok || test_error
+			start_client $i ptp4l "$conf" "${ptp4l_suffixes[i]}" \
+				"$ifaces $extra_ptp4l_options" && test_ok || test_error
 		fi
 
 		[ $? -ne 0 ] && return 1
