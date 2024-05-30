@@ -1,0 +1,57 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with Automotive Profile"
+
+nodes=3
+max_sync_time=100
+
+# Automotive Profile options carried over from gPTP, common between master and slaves
+common_confs="
+gmCapable		1
+priority1		248
+priority2		248
+logSyncInterval		-3
+syncReceiptTimeout	3
+neighborPropDelayThresh	800
+min_neighbor_prop_delay	-20000000
+assume_two_step		1
+path_trace_enabled	1
+follow_up_info		1
+transportSpecific	0x1
+ptp_dst_mac		01:80:C2:00:00:0E
+inhibit_announce	1
+
+BMCA			noop
+inhibit_announce	1
+asCapable		true
+"
+
+# Options not added.
+# network_transport	L2	# The default is UDPv4. clknetsim does not support L2.
+# delay_mechanism	P2P	# The default is E2E. Does clknetsim not support P2P?
+
+# Automotive Profile Master specific options
+master_conf="$common_confs
+masterOnly		1
+inhibit_delay_req	1
+"
+
+# Automotive Profile Slave specific options
+slave_conf="$common_confs
+slaveOnly			1
+ignore_source_id		1
+
+step_threshold			1
+operLogSyncInterval		0
+operLogPdelayReqInterval	2
+msg_interval_request		1
+servo_offset_threshold		30
+servo_num_offset_values		10
+"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
