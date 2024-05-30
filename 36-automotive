@@ -29,9 +29,8 @@ inhibit_announce	1
 asCapable		true
 "
 
-# Options not added.
+# Option not added.
 # network_transport	L2	# The default is UDPv4. clknetsim does not support L2.
-# delay_mechanism	P2P	# The default is E2E. Does clknetsim not support P2P?
 
 # Automotive Profile Master specific options
 master_conf="$common_confs
