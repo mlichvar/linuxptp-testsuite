@@ -4,7 +4,7 @@
 
 test_start "ptp4l with Automotive Profile"
 
-nodes=3
+nodes=2
 max_sync_time=100
 
 # Automotive Profile options carried over from gPTP, common between master and slaves
@@ -22,6 +22,7 @@ follow_up_info		1
 transportSpecific	0x1
 ptp_dst_mac		01:80:C2:00:00:0E
 inhibit_announce	1
+delay_mechanism		P2P
 
 BMCA			noop
 inhibit_announce	1
