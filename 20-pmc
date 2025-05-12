@@ -153,6 +153,20 @@ requests_replies=(
 		userDescription       
 		profileId             00:1b:19:00:01:00"
 
+"TARGET 123456.fffe.780102-2
+GET CLOCK_DESCRIPTION"
+"sending: GET CLOCK_DESCRIPTION
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGE?MENT CLOCK_DESCRIPTION 
+		clockType             0x4000
+		physicalLayerProtocol IEEE 802\.3
+		physicalAddress       12:34:56:78:02:02
+		protocolAddress       1 192\.168\.124\.2
+		manufacturerId        00:00:00
+		productDescription    ;;
+		revisionData          ;;
+		userDescription       
+		profileId             00:1b:19:00:01:00"
+
 "GET PORT_DATA_SET"
 "sending: GET PORT_DATA_SET
 	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGE?MENT PORT_DATA_SET 
@@ -356,6 +370,23 @@ requests_replies=(
 		meanLinkDelay           0
 		scaledNeighborRateRatio 0
 		as_capable              1"
+
+"GET EXTERNAL_GRANDMASTER_PROPERTIES_NP"
+"sending: GET EXTERNAL_GRANDMASTER_PROPERTIES_NP
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT EXTERNAL_GRANDMASTER_PROPERTIES_NP 
+		gmIdentity   000000\.0000\.000000
+		stepsRemoved 0"
+
+"GET PORT_CORRECTIONS_NP"
+"sending: GET PORT_CORRECTIONS_NP
+	123456.fffe.780102-1 seq 0 RESPONSE MANAGEMENT PORT_CORRECTIONS_NP 
+		egressLatency  0 
+		ingressLatency 0 
+		delayAsymmetry 0 
+	123456.fffe.780102-2 seq 0 RESPONSE MANAGEMENT PORT_CORRECTIONS_NP 
+		egressLatency  0 
+		ingressLatency 0 
+		delayAsymmetry 0 "
 )
 
 for i in $(seq 0 $[${#requests_replies[*]} / 2 - 1]); do
@@ -451,6 +482,23 @@ requests_replies=(
 		grandmasterTimeInaccuracy 100
 		networkTimeInaccuracy     100
 		totalTimeInaccuracy       200"
+
+"SET EXTERNAL_GRANDMASTER_PROPERTIES_NP gmIdentity 123456.7890.abcdef stepsRemoved 99"
+"sending: SET EXTERNAL_GRANDMASTER_PROPERTIES_NP
+	123456\.fffe\.780102-0 seq 0 RESPONSE MANAGEMENT EXTERNAL_GRANDMASTER_PROPERTIES_NP 
+		gmIdentity   123456\.7890\.abcdef
+		stepsRemoved 99"
+
+"SET PORT_CORRECTIONS_NP egressLatency 10 ingressLatency 20 delayAsymmetry 30"
+"sending: SET PORT_CORRECTIONS_NP
+	123456\.fffe\.780102-1 seq 0 RESPONSE MANAGEMENT PORT_CORRECTIONS_NP 
+		egressLatency  10 
+		ingressLatency 20 
+		delayAsymmetry 30 
+	123456\.fffe\.780102-2 seq 0 RESPONSE MANAGEMENT PORT_CORRECTIONS_NP 
+		egressLatency  10 
+		ingressLatency 20 
+		delayAsymmetry 30 "
 
 "GET PORT_PROPERTIES_NP"
 "sending: GET PORT_PROPERTIES_NP
