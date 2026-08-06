@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with L2 transport"
+
+master_conf="network_transport L2"
+slave_conf="network_transport L2"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_pass
