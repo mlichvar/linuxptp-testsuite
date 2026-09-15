@@ -1,0 +1,30 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with path tracing"
+
+# 1 --- 2 --- 3
+#       |     |
+#       4 --- 5 --- 6,7
+subnets="1 2 | 2 3 | 2 4 | 3 5 | 4 5 | 5 6 7"
+nodes=7
+max_sync_time=100
+
+master_conf="clockClass 6
+path_trace_enabled 1"
+slave_conf="path_trace_enabled 1"
+log_packets=1
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+test_message 2 0 "checking length of announce messages:"
+for t in "1 2 76" "2 3 84" "2 4 84" "3 5 92" "4 5 92" "5 6 100" "5 7 100"; do
+	read node1 node2 length <<< "$t"
+	grep "	$node1	$node2	.*	320	" tmp/log.packets | \
+		awk '{ print $8 }' | grep -q $length || { test_bad; test_fail; }
+done
+test_ok
+
+test_pass
