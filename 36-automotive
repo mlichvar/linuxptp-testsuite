@@ -22,15 +22,13 @@ follow_up_info		1
 transportSpecific	0x1
 ptp_dst_mac		01:80:C2:00:00:0E
 inhibit_announce	1
+network_transport	L2
 delay_mechanism		P2P
 
 BMCA			noop
 inhibit_announce	1
 asCapable		true
 "
-
-# Option not added.
-# network_transport	L2	# The default is UDPv4. clknetsim does not support L2.
 
 # Automotive Profile Master specific options
 master_conf="$common_confs
