@@ -1,0 +1,26 @@
+#!/bin/bash
+
+. test.common
+
+test_start "ptp4l with locked stable servo state"
+
+nodes=2
+
+slave_conf="servo_offset_threshold 290"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+check_log_message_count 2 " s2 " 90 400 || test_fail
+check_log_message_count 2 " s3 " 90 400 || test_fail
+
+slave_conf="servo_offset_threshold 10000
+servo_num_offset_values 240"
+
+run_ptp4l || test_fail
+check_sync || test_fail
+
+check_log_message_count 2 " s2 " 230 250 || test_fail
+check_log_message_count 2 " s3 " 230 250 || test_fail
+
+test_pass

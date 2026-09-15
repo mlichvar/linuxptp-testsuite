@@ -238,6 +238,14 @@ check_last_log_message() {
 	[[ "$last_message" =~ $last_pattern ]] && test_ok || test_bad
 }
 
+check_log_message_count() {
+	local node=$1 pattern=$2 min=$3 max=$4
+	test_message 2 1 "checking number of \"$pattern\" in node $node log: "
+	count=$(grep "$pattern" tmp/log.$node | wc -l)
+	test_message 3 0 "node $node: $count"
+	[ "$min" -le "$count" ] && [ "$count" -le "$max" ] && test_ok || test_bad
+}
+
 print_nondefaults() {
 	local i defopt defoptname optname
 
